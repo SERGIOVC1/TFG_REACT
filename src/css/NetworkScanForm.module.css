@@ -1,0 +1,146 @@
+.toolBanner img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-bottom: 3px solid #333;
+}
+
+.wrapper {
+  margin: 2rem auto;
+  padding: 2rem;
+  max-width: 600px;
+
+  background: rgba(15, 23, 42, 0.95); /* fondo oscuro transparente */
+  background-image: url("../assets/dark.avif"); /* imagen técnica sutil */
+  background-size: cover;
+  background-repeat: repeat;
+
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.title {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.input {
+  padding: 0.75rem;
+  font-size: 1rem;
+  width: 80%;
+  border: 1px solid #444;
+  border-radius: 8px;
+  text-align: center;
+  background-color: #111;
+  color: white;
+}
+
+.button {
+  background-color: #5995fd;
+  color: white;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #4d84e2;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loader {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.gif {
+  width: 64px;
+  height: 64px;
+}
+
+.progressBarContainer {
+  width: 80%;
+  height: 8px;
+  background-color: #444;
+  border-radius: 10px;
+  margin-top: 1rem;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #4481eb;
+  transition: width 0.5s ease;
+}
+
+.resultContainer {
+  margin-top: 2rem;
+  background-color: #111;
+  padding: 1.5rem;
+  border-radius: 12px;
+  color: white;
+}
+
+.resultTitle {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border: 1px solid #555;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.table th {
+  background-color: #222;
+}
+
+.table tr:hover {
+  background-color: #333;
+}
+
+.noResults {
+  color: #ccc;
+  margin-top: 2rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+
+  /* Fondo negro técnico */
+  background-color: #0f172a;
+  border: 1px solid #1e293b;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.6);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}

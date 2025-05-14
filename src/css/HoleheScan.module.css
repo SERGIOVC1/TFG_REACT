@@ -1,0 +1,83 @@
+.wrapper {
+  margin: 2rem auto;
+  padding: 2rem;
+  max-width: 600px;
+
+  background: rgba(15, 23, 42, 0.95); /* fondo oscuro transparente */
+  background-image: url("../assets/dark.avif"); /* imagen técnica sutil */
+  background-size: cover;
+  background-repeat: repeat;
+
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.toolBanner img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-bottom: 3px solid #333;
+}
+
+.title {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.input {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background-color: #111;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.button {
+  background-color: #5995fd;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: 100%;
+}
+
+.button:hover {
+  background-color: #4d84e2;
+}
+
+.error {
+  color: red;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.resultContainer {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.resultTitle {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.resultBox {
+  background: #111;
+  padding: 1rem;
+  border-radius: 8px;
+  max-height: 500px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.4;
+  border: 1px solid #333;
+}
+ 

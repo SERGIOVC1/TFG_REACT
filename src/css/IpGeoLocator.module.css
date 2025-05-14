@@ -1,0 +1,89 @@
+/* src/css/IpGeoLocator.module.css */
+
+.toolBanner {
+  width: 100%;
+  max-height: 220px;
+  overflow: hidden;
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 2rem;
+}
+
+.toolBanner img {
+  width: 100%;
+  object-fit: cover;
+  height: 100%;
+}
+
+/* Contenedor principal */
+.wrapper {
+  margin: 2rem auto;
+  padding: 2rem;
+  max-width: 600px;
+
+  background: rgba(15, 23, 42, 0.95); /* fondo oscuro transparente */
+  background-image: url("../assets/dark.avif"); /* imagen técnica sutil */
+  background-size: cover;
+  background-repeat: repeat;
+
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+/* Título */
+.title {
+  font-size: 1.8rem;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+/* Input y botón */
+.input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #222;
+  color: #fff;
+  margin-bottom: 1rem;
+  outline: none;
+}
+
+.button {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  background-color: #4481eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.button:hover {
+  background-color: #336bd8;
+}
+
+/* Error */
+.error {
+  color: #ff4c4c;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* Resultados */
+.resultBox {
+  background-color: #222;
+  margin-top: 1.5rem;
+  padding: 1.2rem;
+  border-radius: 10px;
+  color: #eee;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  border: 1px solid #333;
+}

@@ -1,0 +1,131 @@
+/* Estructura base */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f6fa;
+  color: #1a202c;
+}
+
+.App {
+  text-align: center;
+  padding-left: 220px; /* espacio para el sidebar */
+  transition: padding-left 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .App {
+    padding-left: 0;
+  }
+}
+
+/* Header */
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+/* Animación (si se usa aún) */
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Links reactivos */
+.App-link {
+  color: #61dafb;
+}
+
+/* Terminal estilo */
+.terminal {
+  background-color: black;
+  font-family: "Courier New", Courier, monospace;
+  padding: 10px;
+  height: 400px;
+  overflow-y: auto;
+  border-radius: 5px;
+  border: 1px solid #333;
+  white-space: pre-wrap;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Línea individual */
+.terminal-line {
+  line-height: 1.4;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Colores y clases por contenido */
+.url {
+  color: white;
+  display: inline-block;
+  min-width: 200px;
+  padding-right: 10px;
+}
+
+.status.green {
+  color: limegreen;
+}
+
+.status.blue {
+  color: cyan;
+}
+
+.status.yellow {
+  color: orange;
+}
+
+.status.red {
+  color: red;
+}
+
+.size {
+  color: gray;
+  padding-right: 10px;
+}
+
+.redirect {
+  color: lightblue;
+  font-style: italic;
+}
+
+/* Fondo oscuro global */
+body {
+  background-color: #111 !important;
+  color: white;
+}
+
+/* Si quieres evitar scroll lateral por márgenes */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
