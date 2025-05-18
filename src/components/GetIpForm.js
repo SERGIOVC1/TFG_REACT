@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "../css/GetIpForm.module.css";
-import bannerImg from "../assets/banner.avif"; // Asegúrate de tener esta imagen
+import bannerImg from "../assets/banner.avif";
 
 const GetIpForm = ({ setResolvedIp }) => {
   const [domain, setDomain] = useState("");
@@ -8,8 +8,7 @@ const GetIpForm = ({ setResolvedIp }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!domain) {
+    if (!domain.trim()) {
       setError("Por favor ingresa un dominio válido");
       return;
     }
@@ -17,12 +16,46 @@ const GetIpForm = ({ setResolvedIp }) => {
     const cleanDomain = extractDomain(domain);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/network/resolve-ip?domain=${cleanDomain}`);
+      const response = await fetch(
+        `http://localhost:8080/api/network/resolve-ip?domain=${cleanDomain}`
+      );
       const data = await response.json();
 
       if (data.ip) {
         setResolvedIp(data.ip);
         setError("");
+
+        // Obtener IP pública
+        const ipRes = await fetch("https://api.ipify.org?format=json");
+        const { ip: publicIp } = await ipRes.json();
+
+        // Obtener localización
+        let location = "Desconocido";
+        try {
+          const locRes = await fetch("https://ipapi.co/json/");
+          const locData = await locRes.json();
+          location = `${locData.city}, ${locData.country_name}`;
+        } catch {
+          console.warn("No se pudo obtener la localización.");
+        }
+
+        // Registrar en backend
+        await fetch("http://localhost:8080/api/ipresolver/log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ipAddress: publicIp,
+            internalIpAddress: "localhost",
+            result: data.ip,
+            toolUsed: "ipresolver",
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+            isBot: false,
+            location: location,
+            action: "IP Resolver",
+            details: cleanDomain
+          })
+        });
       } else {
         setResolvedIp("");
         setError("No se pudo resolver la IP del dominio");
@@ -36,7 +69,7 @@ const GetIpForm = ({ setResolvedIp }) => {
   const extractDomain = (url) => {
     try {
       return new URL(url).hostname;
-    } catch (error) {
+    } catch {
       return url;
     }
   };
@@ -48,7 +81,8 @@ const GetIpForm = ({ setResolvedIp }) => {
       </div>
 
       <div className={styles.wrapper}>
-       
+        <h2 className={styles.title}>🌐 Resolver IP de un Dominio</h2>
+
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
             className={styles.input}
@@ -61,6 +95,7 @@ const GetIpForm = ({ setResolvedIp }) => {
             Obtener IP
           </button>
         </form>
+
         {error && <p className={styles.error}>{error}</p>}
       </div>
     </>

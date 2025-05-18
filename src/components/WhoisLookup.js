@@ -1,7 +1,7 @@
 // src/components/WhoisLookup.js
 import React, { useState } from "react";
 import styles from "../css/WhoisLookup.module.css";
-import bannerImg from "../assets/banner.avif"; // Usa el mismo banner que en GetIpForm
+import bannerImg from "../assets/banner.avif";
 
 function WhoisLookup() {
   const [domain, setDomain] = useState("");
@@ -30,6 +30,39 @@ function WhoisLookup() {
         setRawResult(data);
         const parsed = extractImportantInfo(data);
         setFilteredResult(parsed);
+
+        // Obtener IP pública
+        const ipRes = await fetch("https://api.ipify.org?format=json");
+        const { ip: publicIp } = await ipRes.json();
+
+        // Obtener localización
+        let location = "Desconocido";
+        try {
+          const locRes = await fetch("https://ipapi.co/json/");
+          const locData = await locRes.json();
+          location = `${locData.city}, ${locData.country_name}`;
+        } catch {
+          console.warn("No se pudo obtener la localización.");
+        }
+
+        // Enviar log al backend
+        await fetch("http://localhost:8080/api/whois/log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ipAddress: publicIp,
+            internalIpAddress: "localhost",
+            domain: domain.trim(),
+            result: data,
+            toolUsed: "whois_lookup",
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+            isBot: false,
+            location: location,
+            action: "WHOIS Lookup",
+            details: domain.trim()
+          })
+        });
       } else {
         setError("Error al consultar WHOIS.");
       }

@@ -37,14 +37,46 @@ function IpGeoLocator() {
     try {
       setError("");
       setData(null);
+
       const res = await fetch(`https://ipapi.co/${encodeURIComponent(ip.trim())}/json/`);
       const json = await res.json();
 
       if (json.error) {
         setError("IP no encontrada o formato inválido.");
-      } else {
-        setData(json);
+        return;
       }
+
+      setData(json);
+
+      // Obtener IP pública del usuario que consulta
+      const publicIpRes = await fetch("https://api.ipify.org?format=json");
+      const { ip: publicIp } = await publicIpRes.json();
+
+      // Obtener localización para registrar
+      let location = "Desconocido";
+      try {
+        const geo = await fetch("https://ipapi.co/json/");
+        const { latitude, longitude } = await geo.json();
+        location = `${latitude}, ${longitude}`;
+      } catch {
+        console.warn("No se pudo obtener la localización.");
+      }
+
+      // Enviar log al backend
+      await fetch("http://localhost:8080/api/geoip/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ipAddress: ip,
+          internalIpAddress: publicIp, // ip real del usuario que consulta
+          result: `${json.city}, ${json.region}, ${json.country_name}`,
+          toolUsed: "geoip",
+          timestamp: Date.now(),
+          userAgent: navigator.userAgent,
+          isBot: false,
+          location: location
+        }),
+      });
     } catch (err) {
       console.error("❌ Error en geolocalización:", err);
       setError("Error al conectar con el servicio de geolocalización.");

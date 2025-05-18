@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "../css/LinkGenerator.module.css";
+import bannerImg from "../assets/banner.avif";
 
 const LinkGenerator = () => {
   const [originalUrl, setOriginalUrl] = useState("");
@@ -28,7 +29,6 @@ const LinkGenerator = () => {
       setShortened(data.shortened);
       setCode(data.code);
 
-      // Guardar en localStorage
       localStorage.setItem("iplogger_shortened", data.shortened);
       localStorage.setItem("iplogger_code", data.code);
     } catch (err) {
@@ -49,81 +49,82 @@ const LinkGenerator = () => {
     }
   };
 
-  // Recuperar estado desde localStorage al cargar la app
   useEffect(() => {
     const storedShortened = localStorage.getItem("iplogger_shortened");
     const storedCode = localStorage.getItem("iplogger_code");
-
     if (storedShortened && storedCode) {
       setShortened(storedShortened);
       setCode(storedCode);
     }
   }, []);
 
-  // Polling de logs si hay código
   useEffect(() => {
     if (code) {
-      const interval = setInterval(() => {
-        fetchLogs(code);
-      }, 5000);
+      const interval = setInterval(() => fetchLogs(code), 5000);
       fetchLogs(code);
       return () => clearInterval(interval);
     }
   }, [code]);
 
   return (
-    <div className={styles.container}>
-      <h2>🎯 Generador de Link Logger</h2>
+    <>
+      <div className={styles.toolBanner}>
+        <img src={bannerImg} alt="Banner Link Logger" />
+      </div>
 
-      <input
-        type="text"
-        value={originalUrl}
-        onChange={(e) => setOriginalUrl(e.target.value)}
-        placeholder="Introduce una URL para ocultar (ej. https://youtube.com/...)"
-        className={styles.input}
-      />
+      <div className={styles.container}>
+        <h2 className={styles.title}>🎯 Generador de Link Logger</h2>
 
-      <button onClick={generateLink} className={styles.button} disabled={loading}>
-        {loading ? "Creando..." : "🎯 Generar Enlace Trampa"}
-      </button>
+        <input
+          type="text"
+          value={originalUrl}
+          onChange={(e) => setOriginalUrl(e.target.value)}
+          placeholder="Introduce una URL (ej. https://youtube.com/...)"
+          className={styles.input}
+        />
 
-      {error && <p className={styles.error}>{error}</p>}
+        <button onClick={generateLink} className={styles.button} disabled={loading}>
+          {loading ? "Creando..." : "🎯 Generar Enlace Trampa"}
+        </button>
 
-      {shortened && (
-        <div className={styles.linkBox}>
-          <p>🔗 Enlace generado:</p>
-          <a href={shortened} target="_blank" rel="noopener noreferrer">
-            {shortened}
-          </a>
-        </div>
-      )}
+        {error && <p className={styles.error}>{error}</p>}
 
-      {logs.length > 0 && (
-        <div className={styles.tableWrapper}>
-          <h3>📊 Últimos accesos:</h3>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>IP</th>
-                <th>User Agent</th>
-                <th>Hora</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map((log, idx) => (
-                <tr key={idx}>
-                  <td>{idx + 1}</td>
-                  <td>{log.ip}</td>
-                  <td>{log.userAgent}</td>
-                  <td>{new Date(log.timestamp).toLocaleString()}</td>
+        {shortened && (
+          <div className={styles.linkBox}>
+            <p>🔗 Enlace generado:</p>
+            <a href={shortened} target="_blank" rel="noopener noreferrer">
+              {shortened}
+            </a>
+          </div>
+        )}
+
+        {logs.length > 0 && (
+          <div className={styles.tableWrapper}>
+            <h3 className={styles.subtitle}>📊 Últimos accesos:</h3>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>IP</th>
+                  <th>User Agent</th>
+                  <th>Hora</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+              </thead>
+              <tbody>
+                {logs.map((log, idx) => (
+                  <tr key={idx}>
+                    <td>{idx + 1}</td>
+                    <td>{log.ip}</td>
+                    <td>{log.userAgent}</td>
+                    <td>{new Date(log.timestamp).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

@@ -9,6 +9,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import styles from "../css/Traceroute.module.css";
+import bannerImg from "../assets/banner.avif";
 
 // Iconos por defecto de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -28,9 +29,7 @@ const Traceroute = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const normalizeTarget = (input) => {
-    return input.replace(/^https?:\/\//, "").split("/")[0];
-  };
+  const normalizeTarget = (input) => input.replace(/^https?:\/\//, "").split("/")[0];
 
   const getProviderName = (org) => {
     const lower = (org || "").toLowerCase();
@@ -60,18 +59,13 @@ const Traceroute = () => {
     try {
       const cleanTarget = normalizeTarget(target);
       const response = await fetch(
-        `http://localhost:8080/api/traceroute?target=${encodeURIComponent(
-          cleanTarget
-        )}`
+        `http://localhost:8080/api/traceroute?target=${encodeURIComponent(cleanTarget)}`
       );
       const data = await response.json();
 
       const ipList = data
-        .map((line) => {
-          const match = line.match(/(\d{1,3}\.){3}\d{1,3}/);
-          return match ? match[0] : null;
-        })
-        .filter((ip) => ip !== null && ip !== "*");
+        .map((line) => line.match(/(\d{1,3}\.){3}\d{1,3}/)?.[0] || null)
+        .filter((ip) => ip && ip !== "*");
 
       setHops(data);
 
@@ -89,14 +83,7 @@ const Traceroute = () => {
               country: info.country || "Desconocido",
             };
           } catch {
-            return {
-              ip,
-              lat: null,
-              lon: null,
-              org: "Desconocido",
-              city: "Desconocido",
-              country: "Desconocido",
-            };
+            return { ip, lat: null, lon: null, org: "Desconocido", city: "?", country: "?" };
           }
         })
       );
@@ -114,76 +101,77 @@ const Traceroute = () => {
   const polyline = geoHops.map((hop) => [hop.lat, hop.lon]);
 
   return (
-    <div className={styles.container}>
-      <h2>🛰️ Traceroute Interactivo con Mapa</h2>
+    <>
+      <div className={styles.toolBanner}>
+        <img src={bannerImg} alt="Traceroute banner" />
+      </div>
 
-      <input
-        type="text"
-        value={target}
-        onChange={(e) => setTarget(e.target.value)}
-        placeholder="ej. google.com"
-        className={styles.input}
-      />
-      <button onClick={handleTraceroute} className={styles.button} disabled={loading}>
-        🚀 Ejecutar Traceroute
-      </button>
+      <div className={styles.container}>
+        <h2 className={styles.title}>🛰️ Traceroute Interactivo</h2>
 
-      {loading && <p className={styles.loading}>⏳ Ejecutando traceroute...</p>}
-      {error && <p className={styles.error}>{error}</p>}
+        <input
+          type="text"
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+          placeholder="ej. google.com"
+          className={styles.input}
+        />
+        <button onClick={handleTraceroute} className={styles.button} disabled={loading}>
+          🚀 Ejecutar Traceroute
+        </button>
 
-      {hops.length > 0 && (
-        <>
-          <div className={styles.tableContainer}>
-            <h3>📍 Saltos:</h3>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>IP</th>
-                  <th>Ubicación</th>
-                  <th>Proveedor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {geoHops.map((hop, idx) => (
-                  <tr key={idx}>
-                    <td>{idx + 1}</td>
-                    <td>{hop.ip}</td>
-                    <td>{hop.city}, {hop.country}</td>
-                    <td>{hop.org}</td>
+        {loading && <p className={styles.loading}>⏳ Ejecutando...</p>}
+        {error && <p className={styles.error}>{error}</p>}
+
+        {hops.length > 0 && (
+          <>
+            <div className={styles.tableContainer}>
+              <h3 className={styles.subtitle}>📍 Saltos:</h3>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>IP</th>
+                    <th>Ubicación</th>
+                    <th>Proveedor</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {geoHops.map((hop, idx) => (
+                    <tr key={idx}>
+                      <td>{idx + 1}</td>
+                      <td>{hop.ip}</td>
+                      <td>{hop.city}, {hop.country}</td>
+                      <td>{hop.org}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <div className={styles.mapWrapper}>
-            <MapContainer
-              center={center}
-              zoom={2}
-              scrollWheelZoom={true}
-              className={styles.map}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {geoHops.map((hop, idx) => (
-                <Marker key={idx} position={[hop.lat, hop.lon]}>
-                  <Popup>
-                    <strong>Salto {idx + 1}</strong><br />
-                    IP: {hop.ip}<br />
-                    {hop.city}, {hop.country}<br />
-                    Proveedor: {hop.org}
-                  </Popup>
-                </Marker>
-              ))}
-              <Polyline positions={polyline} color="blue" />
-            </MapContainer>
-          </div>
-        </>
-      )}
-    </div>
+            <div className={styles.mapWrapper}>
+              <MapContainer center={center} zoom={2} scrollWheelZoom={true} className={styles.map}>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {geoHops.map((hop, idx) => (
+                  <Marker key={idx} position={[hop.lat, hop.lon]}>
+                    <Popup>
+                      <strong>Salto {idx + 1}</strong><br />
+                      IP: {hop.ip}<br />
+                      {hop.city}, {hop.country}<br />
+                      Proveedor: {hop.org}
+                    </Popup>
+                  </Marker>
+                ))}
+                <Polyline positions={polyline} color="deepskyblue" />
+              </MapContainer>
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

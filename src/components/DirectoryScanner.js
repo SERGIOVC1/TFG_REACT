@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "../css/DirectoryScanner.module.css";
+import bannerImg from "../assets/banner.avif";
 
 const DirectoryScanner = () => {
   const [target, setTarget] = useState("");
@@ -94,42 +95,52 @@ const DirectoryScanner = () => {
       else if (status.startsWith("3")) statusClass = "blue";
 
       return `
-        <span class="${styles.url}">${url.padEnd(30)}</span> 
+        <span class="${styles.url}">${url}</span> 
         <span class="${styles.status} ${styles[statusClass]}">(Status: ${status})</span>  
         <span class="${styles.size}">[Size: ${size}]</span>  
         ${redirect ? `<span class="${styles.redirect}">[→ ${redirect}]</span>` : ""}
       `;
     }
 
-    return `<span class="${styles.terminalLine}">${line}</span>`;
+    return `<span class="${styles.resultLine}">${line}</span>`;
   };
 
   return (
-    <div className={styles.container}>
-      <h2>📂 Escaneo de Directorios</h2>
-      <input
-        type="text"
-        placeholder="Introduce la URL"
-        value={target}
-        onChange={(e) => setTarget(e.target.value)}
-        className={styles.input}
-      />
-      <div className={styles.buttonGroup}>
-        <button onClick={handleScan} disabled={scanning} className={styles.button}>
-          {scanning ? "Escaneando..." : "Iniciar Escaneo"}
-        </button>
-        <button onClick={handleStop} disabled={!scanning} className={styles.button}>
-          Detener Escaneo
-        </button>
+    <>
+      <div className={styles.toolBanner}>
+        <img src={bannerImg} alt="Banner Directory Scan" />
       </div>
-      {showTerminal && (
-        <div ref={terminalRef} className={styles.terminal}>
-          {logs.map((log, i) => (
-            <div key={i} dangerouslySetInnerHTML={{ __html: log }} />
-          ))}
-        </div>
-      )}
-    </div>
+
+      <div className={styles.wrapper}>
+        <h2 className={styles.title}>📂 Escaneo de Directorios</h2>
+
+        <input
+          type="text"
+          placeholder="Introduce la URL"
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+          className={styles.input}
+        />
+
+        <button
+          onClick={scanning ? handleStop : handleScan}
+          className={styles.button}
+        >
+          {scanning ? "Detener Escaneo" : "Iniciar Escaneo"}
+        </button>
+
+        {showTerminal && (
+          <div className={styles.resultContainer}>
+            <h4 className={styles.resultTitle}>📄 Resultado:</h4>
+            <div ref={terminalRef} className={styles.resultBox}>
+              {logs.map((log, i) => (
+                <div key={i} dangerouslySetInnerHTML={{ __html: log }} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

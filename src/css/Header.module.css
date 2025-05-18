@@ -14,24 +14,10 @@
   backdrop-filter: blur(6px);
 }
 
-.logo {
-  font-size: 1.6rem;
-  font-family: 'Orbitron', sans-serif;
-  font-weight: 600;
+.logoContainer {
   display: flex;
   align-items: center;
-  color: white;
   gap: 0.75rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.logo:hover {
-  color: #38bdf8;
-}
-
-.brand {
-  user-select: none;
 }
 
 .menuIcon {
@@ -44,4 +30,18 @@
 
 .menuIcon:hover {
   transform: scale(1.1);
+}
+
+.brand {
+  font-size: 1.6rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.brand:hover {
+  color: #38bdf8;
 }

@@ -1,4 +1,3 @@
-// src/components/Header.js
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../css/Header.module.css";
@@ -9,17 +8,16 @@ const Header = ({ onMenuClick }) => {
 
   return (
     <header className={styles.header}>
-      <div className={styles.logo} onClick={() => navigate("/")}>
+      <div className={styles.logoContainer}>
         <img
           src={menuIcon}
           alt="Menú"
           className={styles.menuIcon}
-          onClick={(e) => {
-            e.stopPropagation(); // para evitar conflicto con el navigate
-            onMenuClick();
-          }}
+          onClick={onMenuClick}
         />
-        <span className={styles.brand}>SecureOps</span>
+        <span className={styles.brand} onClick={() => navigate("/")}>
+          SecureOps
+        </span>
       </div>
     </header>
   );
