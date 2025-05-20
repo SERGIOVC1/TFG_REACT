@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from '../css/NetworkScanForm.module.css';
-import bannerImg from '../assets/banner.avif'; // Asegúrate de tener la imagen
+import bannerImg from '../assets/banner.avif';
 
 const NetworkScanForm = () => {
   const [ipAddress, setIpAddress] = useState('');
@@ -45,6 +45,43 @@ const NetworkScanForm = () => {
         if (data && data.result) {
           const parsedResults = parseScanResult(data.result);
           setScanResults(parsedResults);
+
+          // 🔍 Obtener IP pública
+          let publicIp = 'Desconocida';
+          try {
+            const ipRes = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipRes.json();
+            publicIp = ipData.ip || 'Desconocida';
+          } catch (err) {
+            console.warn('No se pudo obtener IP pública');
+          }
+
+          // 🌍 Obtener ubicación
+          let location = 'Desconocida';
+          try {
+            const locRes = await fetch('https://ipapi.co/json/');
+            const locData = await locRes.json();
+            location = `${locData.city}, ${locData.country_name}`;
+          } catch (err) {
+            console.warn('No se pudo obtener la localización');
+          }
+
+          // 📝 Enviar log al backend
+          await fetch('http://localhost:8080/api/network/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ipAddress: publicIp,
+              action: 'Network Scan',
+              details: target,
+              result: data.result,
+              toolUsed: 'network_scan',
+              timestamp: Date.now(),
+              userAgent: navigator.userAgent,
+              isBot: false,
+              location: location,
+            }),
+          });
         } else {
           setScanResults([]);
         }
@@ -60,7 +97,10 @@ const NetworkScanForm = () => {
   };
 
   const isValidUrl = (str) => {
-    const pattern = new RegExp('^(https?:\\/\\/)?([a-z0-9-]+\\.)+[a-z0-9]{2,4}(:[0-9]{1,5})?(\\/.*)?$', 'i');
+    const pattern = new RegExp(
+      '^(https?:\\/\\/)?([a-z0-9-]+\\.)+[a-z0-9]{2,4}(:[0-9]{1,5})?(\\/.*)?$',
+      'i'
+    );
     return pattern.test(str);
   };
 
@@ -111,16 +151,23 @@ const NetworkScanForm = () => {
             className={styles.button}
             disabled={loading}
           >
-            {loading ? "🔍 Escaneando..." : "🚀 Iniciar Escaneo"}
+            {loading ? '🔍 Escaneando...' : '🚀 Iniciar Escaneo'}
           </button>
         </form>
 
         {loading && (
           <div className={styles.loader}>
-            <img src="/Animation - 1738981226902.gif" alt="Cargando..." className={styles.gif} />
+            <img
+              src="/Animation - 1738981226902.gif"
+              alt="Cargando..."
+              className={styles.gif}
+            />
             <p>⏳ Buscando puertos abiertos...</p>
             <div className={styles.progressBarContainer}>
-              <div className={styles.progress} style={{ width: `${progress}%` }} />
+              <div
+                className={styles.progress}
+                style={{ width: `${progress}%` }}
+              />
             </div>
           </div>
         )}

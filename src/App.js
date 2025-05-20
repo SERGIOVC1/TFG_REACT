@@ -92,7 +92,7 @@ function App() {
               path="/network"
               element={
                 <div>
-                  <h2>📡 Escaneo de Red</h2>
+                
                   <NetworkScanForm setNetworkResults={setNetworkResults} />
                   <ResultsTable results={networkResults} />
                 </div>

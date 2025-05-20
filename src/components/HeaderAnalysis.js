@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "../css/HeaderAnalysis.module.css";
-import bannerImg from "../assets/banner.avif"; // ✅ Imagen de encabezado
+import bannerImg from "../assets/banner.avif";
 
 const HeaderAnalysis = () => {
   const [url, setUrl] = useState("");
@@ -16,7 +16,13 @@ const HeaderAnalysis = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/security/headers?url=${encodeURIComponent(url)}`
+        `http://localhost:8080/api/security/headers?url=${encodeURIComponent(url)}`,
+        {
+          method: "GET",
+          headers: {
+            "User-Agent": navigator.userAgent // ✅ Enviar el user agent real
+          }
+        }
       );
 
       if (!response.ok) {
@@ -35,7 +41,6 @@ const HeaderAnalysis = () => {
 
   return (
     <>
-      {/* ✅ Banner superior como en GetIpForm */}
       <div className={styles.toolBanner}>
         <img src={bannerImg} alt="Banner Header Analysis" />
       </div>
