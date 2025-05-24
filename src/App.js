@@ -23,6 +23,8 @@ import LoginRegister from "./pages/LoginRegister";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 
+import Movimientos from "./components/Movimientos"; // Importa el componente Movimientos
+
 import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
@@ -44,7 +46,7 @@ function App() {
   }, []);
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
-  const hideSidebar = () => setSidebarVisible(false); // 👈 nueva función
+  const hideSidebar = () => setSidebarVisible(false);
 
   if (loadingUser) {
     return (
@@ -70,7 +72,7 @@ function App() {
         <Sidebar
           visible={sidebarVisible}
           onLogout={() => signOut(auth)}
-          onLinkClick={hideSidebar} // ✅ nuevo prop
+          onLinkClick={hideSidebar}
         />
         <div style={{ marginLeft: sidebarVisible ? "230px" : "0", flexGrow: 1 }}>
           <Header onMenuClick={toggleSidebar} />
@@ -79,7 +81,6 @@ function App() {
               path="/ip"
               element={
                 <div>
-                  
                   <GetIpForm setResolvedIp={setResolvedIp} />
                   {resolvedIp && <h3>📡 La IP del dominio es: {resolvedIp}</h3>}
                 </div>
@@ -92,7 +93,6 @@ function App() {
               path="/network"
               element={
                 <div>
-                
                   <NetworkScanForm setNetworkResults={setNetworkResults} />
                   <ResultsTable results={networkResults} />
                 </div>
@@ -103,6 +103,10 @@ function App() {
             <Route path="/tech" element={<TechnologyScanner />} />
             <Route path="/traceroute" element={<Traceroute />} />
             <Route path="/logger" element={<LinkGenerator />} />
+
+            {/* Ruta Movimientos con userId pasado como prop */}
+            <Route path="/movimientos" element={<Movimientos userId={user.uid} />} />
+
             <Route path="*" element={<Landing />} />
           </Routes>
         </div>
