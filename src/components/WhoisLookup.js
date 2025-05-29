@@ -1,9 +1,11 @@
 // src/components/WhoisLookup.js
 import React, { useState } from "react";
+import { useAuth } from "./AuthContext"; // Importa desde components/AuthContext.js
 import styles from "../css/WhoisLookup.module.css";
 import bannerImg from "../assets/banner.avif";
 
 function WhoisLookup() {
+  const { user } = useAuth(); // Obtener usuario logueado
   const [domain, setDomain] = useState("");
   const [rawResult, setRawResult] = useState("");
   const [filteredResult, setFilteredResult] = useState(null);
@@ -23,7 +25,11 @@ function WhoisLookup() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/whois?domain=${encodeURIComponent(domain.trim())}`);
+      const response = await fetch(
+        `http://localhost:8080/api/whois?domain=${encodeURIComponent(
+          domain.trim()
+        )}`
+      );
       const data = await response.text();
 
       if (response.ok) {
@@ -45,23 +51,23 @@ function WhoisLookup() {
           console.warn("No se pudo obtener la localización.");
         }
 
-        // Enviar log al backend
-        await fetch("http://localhost:8080/api/whois/log", {
+        // Enviar log al backend con userId
+        await fetch("http://localhost:8080/api/audit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ipAddress: publicIp,
-            internalIpAddress: "localhost",
-            domain: domain.trim(),
-            result: data,
-            toolUsed: "whois_lookup",
-            timestamp: Date.now(),
-            userAgent: navigator.userAgent,
-            isBot: false,
-            location: location,
+            userId: user?.uid || "desconocido", // UID Firebase o "desconocido"
             action: "WHOIS Lookup",
-            details: domain.trim()
-          })
+            tableName: "whois_log",
+            recordId: 20,
+            timestamp: new Date().toISOString(),
+            details: JSON.stringify({
+              domain: domain.trim(),
+              location: location,
+              rawResult: data,
+              publicIp: publicIp,
+            }),
+          }),
         });
       } else {
         setError("Error al consultar WHOIS.");
@@ -78,16 +84,26 @@ function WhoisLookup() {
     const lines = raw.split("\n");
     const info = {};
 
-    lines.forEach(line => {
+    lines.forEach((line) => {
       if (line.includes("Domain Name:")) info.domain = line.split(":")[1]?.trim();
-      if (line.includes("Registrar:") && !line.includes("WHOIS Server") && !info.registrar)
+      if (
+        line.includes("Registrar:") &&
+        !line.includes("WHOIS Server") &&
+        !info.registrar
+      )
         info.registrar = line.split(":")[1]?.trim();
-      if (line.includes("Registrar URL:")) info.registrarURL = line.split(":")[1]?.trim();
-      if (line.includes("Registrar Abuse Contact Email:")) info.abuseEmail = line.split(":")[1]?.trim();
-      if (line.includes("Registrar Abuse Contact Phone:")) info.abusePhone = line.split(":")[1]?.trim();
-      if (line.includes("Creation Date:")) info.creationDate = line.split(":")[1]?.trim();
-      if (line.includes("Updated Date:")) info.updatedDate = line.split(":")[1]?.trim();
-      if (line.includes("Registry Expiry Date:")) info.expiryDate = line.split(":")[1]?.trim();
+      if (line.includes("Registrar URL:"))
+        info.registrarURL = line.split(":")[1]?.trim();
+      if (line.includes("Registrar Abuse Contact Email:"))
+        info.abuseEmail = line.split(":")[1]?.trim();
+      if (line.includes("Registrar Abuse Contact Phone:"))
+        info.abusePhone = line.split(":")[1]?.trim();
+      if (line.includes("Creation Date:"))
+        info.creationDate = line.split(":")[1]?.trim();
+      if (line.includes("Updated Date:"))
+        info.updatedDate = line.split(":")[1]?.trim();
+      if (line.includes("Registry Expiry Date:"))
+        info.expiryDate = line.split(":")[1]?.trim();
       if (line.includes("Name Server:")) {
         if (!info.nameServers) info.nameServers = [];
         info.nameServers.push(line.split(":")[1]?.trim());
@@ -117,7 +133,11 @@ function WhoisLookup() {
             className={styles.input}
           />
 
-          <button onClick={handleLookup} disabled={loading} className={styles.button}>
+          <button
+            onClick={handleLookup}
+            disabled={loading}
+            className={styles.button}
+          >
             {loading ? "Consultando..." : "Consultar"}
           </button>
         </div>

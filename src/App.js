@@ -23,7 +23,7 @@ import LoginRegister from "./pages/LoginRegister";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 
-import Movimientos from "./components/Movimientos"; // Importa el componente Movimientos
+import Movimientos from "./components/Movimientos";
 
 import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -80,10 +80,10 @@ function App() {
             <Route
               path="/ip"
               element={
-                <div>
+                <>
                   <GetIpForm setResolvedIp={setResolvedIp} />
                   {resolvedIp && <h3>📡 La IP del dominio es: {resolvedIp}</h3>}
-                </div>
+                </>
               }
             />
             <Route path="/geo" element={<IpGeoLocator />} />
@@ -92,10 +92,10 @@ function App() {
             <Route
               path="/network"
               element={
-                <div>
+                <>
                   <NetworkScanForm setNetworkResults={setNetworkResults} />
                   <ResultsTable results={networkResults} />
-                </div>
+                </>
               }
             />
             <Route path="/dir" element={<DirectoryScanner />} />
@@ -104,7 +104,7 @@ function App() {
             <Route path="/traceroute" element={<Traceroute />} />
             <Route path="/logger" element={<LinkGenerator />} />
 
-            {/* Ruta Movimientos con userId pasado como prop */}
+            {/* Movimientos recibe userId para filtrar datos */}
             <Route path="/movimientos" element={<Movimientos userId={user.uid} />} />
 
             <Route path="*" element={<Landing />} />

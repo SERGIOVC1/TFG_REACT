@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 
-const Movimientos = ({ userId }) => {
+const Movimientos = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!userId) return;
-
     setLoading(true);
-    fetch(`http://localhost:8080/api/audit/user/${userId}`)
+    fetch("http://localhost:8080/api/audit/all")
       .then((res) => {
         if (!res.ok) throw new Error("Error al obtener movimientos");
         return res.json();
@@ -22,16 +20,15 @@ const Movimientos = ({ userId }) => {
         setError(e.message);
         setLoading(false);
       });
-  }, [userId]);
+  }, []);
 
-  if (!userId) return <p>Usuario no autenticado.</p>;
   if (loading) return <p>Cargando movimientos...</p>;
   if (error) return <p>Error: {error}</p>;
   if (logs.length === 0) return <p>No hay movimientos.</p>;
 
   return (
     <div>
-      <h2>Movimientos de Usuario</h2>
+      <h2>Movimientos</h2>
       <table>
         <thead>
           <tr>
