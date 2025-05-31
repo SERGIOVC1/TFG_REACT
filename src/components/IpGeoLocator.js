@@ -1,8 +1,9 @@
-// src/components/IpGeoLocator.js
 import React, { useState, useEffect } from "react";
+import { useAuth } from "./AuthContext";  // Ajusta ruta si es necesario
 import styles from "../css/IpGeoLocator.module.css";
 
 function IpGeoLocator() {
+  const { user } = useAuth();
   const [ip, setIp] = useState("");
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -48,33 +49,31 @@ function IpGeoLocator() {
 
       setData(json);
 
-      // Obtener IP pública del usuario que consulta
       const publicIpRes = await fetch("https://api.ipify.org?format=json");
       const { ip: publicIp } = await publicIpRes.json();
 
-      // Obtener localización para registrar
       let location = "Desconocido";
       try {
         const geo = await fetch("https://ipapi.co/json/");
-        const { latitude, longitude } = await geo.json();
-        location = `${latitude}, ${longitude}`;
+        const geoData = await geo.json();
+        location = `${geoData.latitude}, ${geoData.longitude}`;
       } catch {
         console.warn("No se pudo obtener la localización.");
       }
 
-      // Enviar log al backend
       await fetch("http://localhost:8080/api/geoip/log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          userId: user?.uid || "desconocido",
           ipAddress: ip,
-          internalIpAddress: publicIp, // ip real del usuario que consulta
+          internalIpAddress: publicIp,
           result: `${json.city}, ${json.region}, ${json.country_name}`,
           toolUsed: "geoip",
           timestamp: Date.now(),
           userAgent: navigator.userAgent,
           isBot: false,
-          location: location
+          location: location,
         }),
       });
     } catch (err) {

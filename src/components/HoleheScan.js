@@ -1,8 +1,11 @@
+// src/components/HoleheScan.js
 import React, { useState } from "react";
+import { useAuth } from "./AuthContext"; // Importa el contexto para obtener userId
 import styles from "../css/HoleheScan.module.css";
 import bannerImg from "../assets/banner.avif";
 
 function HoleheScan() {
+  const { user } = useAuth(); // Obtener usuario logueado
   const [email, setEmail] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +28,7 @@ function HoleheScan() {
       if (res.ok) {
         setResult(text);
 
-        // 🔍 Extraer dominios donde aparece registrado
+        // Extraer dominios donde aparece registrado
         const foundSites = text
           .split("\n")
           .filter((line) => line.startsWith("[+]"))
@@ -36,11 +39,11 @@ function HoleheScan() {
 
         const cleanedResult = foundSites.join(", ");
 
-        // 🌐 Obtener IP pública
+        // Obtener IP pública
         const ipResponse = await fetch("https://api.ipify.org?format=json");
         const { ip: publicIp } = await ipResponse.json();
 
-        // 🌍 Obtener ubicación por IP
+        // Obtener ubicación por IP
         let location = "Desconocido";
         try {
           const geo = await fetch(`https://ipapi.co/json/`);
@@ -50,19 +53,21 @@ function HoleheScan() {
           console.warn("No se pudo obtener la localización.");
         }
 
-        // 📥 Enviar log al backend
-        await fetch("http://localhost:8080/honeypot/log", {
+        // Enviar log al backend con userId
+        await fetch("http://localhost:8080/api/holehe/log", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            userId: user?.uid || "desconocido",  // Incluye el UID o "desconocido"
             ipAddress: publicIp,
-            internalIpAddress: "localhost", // si no capturas IP privada
+            internalIpAddress: "localhost",
             action: "Email Scan",
             details: email.trim(),
             result: cleanedResult,
             toolUsed: "holehe",
             timestamp: Date.now(),
             userAgent: navigator.userAgent,
+            isBot: false,
             location: location,
           }),
         });
