@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import styles from "../css/HeaderAnalysis.module.css";
 import bannerImg from "../assets/banner.avif";
+import { useAuth } from "../components/AuthContext"; // Importa el hook
 
 const HeaderAnalysis = () => {
+  const { user } = useAuth(); // Usa el hook para obtener user
   const [url, setUrl] = useState("");
   const [headers, setHeaders] = useState(null);
   const [error, setError] = useState("");
@@ -15,13 +17,20 @@ const HeaderAnalysis = () => {
     setLoading(true);
 
     try {
+      const userId = user?.uid || "desconocido";
+
+      const queryParams = new URLSearchParams({
+        url: url,
+        userId: userId,
+      });
+
       const response = await fetch(
-        `http://localhost:8080/api/security/headers?url=${encodeURIComponent(url)}`,
+        `http://localhost:8080/api/security/headers?${queryParams.toString()}`,
         {
           method: "GET",
           headers: {
-            "User-Agent": navigator.userAgent // ✅ Enviar el user agent real
-          }
+            "User-Agent": navigator.userAgent,
+          },
         }
       );
 

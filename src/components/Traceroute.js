@@ -10,8 +10,9 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import styles from "../css/Traceroute.module.css";
 import bannerImg from "../assets/banner.avif";
+import { useAuth } from "../components/AuthContext"; // Ajusta según tu proyecto
 
-// Iconos por defecto de Leaflet
+// Configuración iconos Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -23,6 +24,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const Traceroute = () => {
+  const { user } = useAuth();
   const [target, setTarget] = useState("");
   const [hops, setHops] = useState([]);
   const [geoHops, setGeoHops] = useState([]);
@@ -58,16 +60,21 @@ const Traceroute = () => {
 
     try {
       const cleanTarget = normalizeTarget(target);
-      const response = await fetch(
-        `http://localhost:8080/api/traceroute?target=${encodeURIComponent(cleanTarget)}`
-      );
+      const userId = user?.uid || "desconocido";
+
+      const params = new URLSearchParams({
+        target: cleanTarget,
+        userId,
+      });
+
+      const response = await fetch(`http://localhost:8080/api/traceroute?${params.toString()}`);
       const data = await response.json();
+
+      setHops(data);
 
       const ipList = data
         .map((line) => line.match(/(\d{1,3}\.){3}\d{1,3}/)?.[0] || null)
         .filter((ip) => ip && ip !== "*");
-
-      setHops(data);
 
       const geos = await Promise.all(
         ipList.map(async (ip) => {

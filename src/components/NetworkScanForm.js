@@ -1,8 +1,11 @@
+// src/components/NetworkScanForm.js
 import React, { useState } from 'react';
+import { useAuth } from './AuthContext'; // Importar el contexto para obtener userId
 import styles from '../css/NetworkScanForm.module.css';
 import bannerImg from '../assets/banner.avif';
 
 const NetworkScanForm = () => {
+  const { user } = useAuth();  // Obtener usuario logueado
   const [ipAddress, setIpAddress] = useState('');
   const [scanType, setScanType] = useState('basic');
   const [scanResults, setScanResults] = useState([]);
@@ -46,7 +49,7 @@ const NetworkScanForm = () => {
           const parsedResults = parseScanResult(data.result);
           setScanResults(parsedResults);
 
-          // 🔍 Obtener IP pública
+          // Obtener IP pública
           let publicIp = 'Desconocida';
           try {
             const ipRes = await fetch('https://api.ipify.org?format=json');
@@ -56,7 +59,7 @@ const NetworkScanForm = () => {
             console.warn('No se pudo obtener IP pública');
           }
 
-          // 🌍 Obtener ubicación
+          // Obtener ubicación
           let location = 'Desconocida';
           try {
             const locRes = await fetch('https://ipapi.co/json/');
@@ -66,11 +69,12 @@ const NetworkScanForm = () => {
             console.warn('No se pudo obtener la localización');
           }
 
-          // 📝 Enviar log al backend
+          // Enviar log al backend incluyendo userId
           await fetch('http://localhost:8080/api/network/log', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              userId: user?.uid || "desconocido",  // Aquí el UID Firebase
               ipAddress: publicIp,
               action: 'Network Scan',
               details: target,
@@ -146,28 +150,17 @@ const NetworkScanForm = () => {
             disabled={loading}
           />
 
-          <button
-            type="submit"
-            className={styles.button}
-            disabled={loading}
-          >
+          <button type="submit" className={styles.button} disabled={loading}>
             {loading ? '🔍 Escaneando...' : '🚀 Iniciar Escaneo'}
           </button>
         </form>
 
         {loading && (
           <div className={styles.loader}>
-            <img
-              src="/Animation - 1738981226902.gif"
-              alt="Cargando..."
-              className={styles.gif}
-            />
+            <img src="/Animation - 1738981226902.gif" alt="Cargando..." className={styles.gif} />
             <p>⏳ Buscando puertos abiertos...</p>
             <div className={styles.progressBarContainer}>
-              <div
-                className={styles.progress}
-                style={{ width: `${progress}%` }}
-              />
+              <div className={styles.progress} style={{ width: `${progress}%` }} />
             </div>
           </div>
         )}

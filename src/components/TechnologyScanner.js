@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import styles from "../css/TechnologyScanner.module.css";
 import bannerImg from "../assets/banner.avif";
+// Importa el hook useAuth para obtener userId
+import { useAuth } from "../components/AuthContext";
 
 const TechnologyScanner = () => {
+  const { user } = useAuth();
   const [domain, setDomain] = useState("");
   const [results, setResults] = useState({});
   const [loading, setLoading] = useState(false);
@@ -14,9 +17,19 @@ const TechnologyScanner = () => {
     setResults({});
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/tech-scan?domain=${encodeURIComponent(domain)}`
-      );
+      // Añadir userId al query params si tienes (opcional)
+      const userId = user?.uid || "desconocido";
+      const params = new URLSearchParams({
+        domain,
+        userId,
+      });
+
+      const response = await fetch(`http://localhost:8080/api/tech-scan?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error("Error en la respuesta del servidor.");
+      }
+
       const data = await response.json();
 
       if (data.Error) {
@@ -26,6 +39,7 @@ const TechnologyScanner = () => {
       }
     } catch (err) {
       setError("Error al conectar con el servidor.");
+      console.error(err);
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "../css/DirectoryScanner.module.css";
 import bannerImg from "../assets/banner.avif";
 
-const DirectoryScanner = () => {
+const DirectoryScanner = ({ userId }) => {
   const [target, setTarget] = useState("");
   const [logs, setLogs] = useState([]);
   const [scanning, setScanning] = useState(false);
@@ -32,7 +32,7 @@ const DirectoryScanner = () => {
     }
 
     const eventSource = new EventSource(
-      `http://localhost:8080/api/webscan/directories?target=${target}`
+      `http://localhost:8080/api/webscan/directories?target=${encodeURIComponent(target)}&userId=${encodeURIComponent(userId || "")}`
     );
 
     eventSource.onmessage = async (event) => {

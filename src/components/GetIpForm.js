@@ -1,23 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import styles from "../css/GetIpForm.module.css";
 import bannerImg from "../assets/banner.avif";
+// Importa tu contexto de auth
+import { useAuth } from "../components/AuthContext";
 
 const GetIpForm = ({ setResolvedIp }) => {
+  const { user } = useAuth(); // Obtener usuario logueado, con uid o null
   const [domain, setDomain] = useState("");
   const [error, setError] = useState("");
+  const [userIdDisplayed, setUserIdDisplayed] = useState("");
+
+  const extractDomain = (url) => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return url;
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     if (!domain.trim()) {
       setError("Por favor ingresa un dominio válido");
       return;
     }
 
     const cleanDomain = extractDomain(domain);
+    const userId = user?.uid || "desconocido";
+    setUserIdDisplayed(userId);
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/network/resolve-ip?domain=${cleanDomain}`
+        `http://localhost:8080/api/ipresolver/resolve-ip?domain=${cleanDomain}`
       );
       const data = await response.json();
 
@@ -39,7 +55,7 @@ const GetIpForm = ({ setResolvedIp }) => {
           console.warn("No se pudo obtener la localización.");
         }
 
-        // Registrar en backend
+        // Enviar log al backend con userId
         await fetch("http://localhost:8080/api/ipresolver/log", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -53,24 +69,19 @@ const GetIpForm = ({ setResolvedIp }) => {
             isBot: false,
             location: location,
             action: "IP Resolver",
-            details: cleanDomain
-          })
+            details: cleanDomain,
+            userId,  // Aquí enviamos el userId
+          }),
         });
       } else {
         setResolvedIp("");
         setError("No se pudo resolver la IP del dominio");
+        setUserIdDisplayed("");
       }
     } catch (err) {
       console.error("Error al obtener la IP:", err);
       setError("Error al conectar con el servidor");
-    }
-  };
-
-  const extractDomain = (url) => {
-    try {
-      return new URL(url).hostname;
-    } catch {
-      return url;
+      setUserIdDisplayed("");
     }
   };
 
@@ -97,6 +108,12 @@ const GetIpForm = ({ setResolvedIp }) => {
         </form>
 
         {error && <p className={styles.error}>{error}</p>}
+
+        {userIdDisplayed && (
+          <p style={{ marginTop: "1rem", color: "#ccc" }}>
+            Usuario: <strong>{userIdDisplayed}</strong>
+          </p>
+        )}
       </div>
     </>
   );
