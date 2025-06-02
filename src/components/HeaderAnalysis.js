@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import styles from "../css/HeaderAnalysis.module.css";
 import bannerImg from "../assets/banner.avif";
-import { useAuth } from "../components/AuthContext"; // Importa el hook
+import { useAuth } from "../components/AuthContext";
 
 const HeaderAnalysis = () => {
-  const { user } = useAuth(); // Usa el hook para obtener user
+  const { user } = useAuth();
   const [url, setUrl] = useState("");
   const [headers, setHeaders] = useState(null);
   const [error, setError] = useState("");
@@ -18,25 +18,13 @@ const HeaderAnalysis = () => {
 
     try {
       const userId = user?.uid || "desconocido";
-
-      const queryParams = new URLSearchParams({
-        url: url,
-        userId: userId,
-      });
-
+      const queryParams = new URLSearchParams({ url, userId });
       const response = await fetch(
         `http://localhost:8080/api/security/headers?${queryParams.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            "User-Agent": navigator.userAgent,
-          },
-        }
+        { method: "GET", headers: { "User-Agent": navigator.userAgent } }
       );
 
-      if (!response.ok) {
-        throw new Error("No se pudieron obtener los headers.");
-      }
+      if (!response.ok) throw new Error("No se pudieron obtener los headers.");
 
       const data = await response.json();
       setHeaders(data);
@@ -55,7 +43,7 @@ const HeaderAnalysis = () => {
       </div>
 
       <div className={styles.container} id="headers">
-        <h2 className={styles.title}>🧠 Análisis de Headers HTTP</h2>
+        <h2 className={styles.title}> Análisis de Headers HTTP</h2>
 
         <form onSubmit={handleFetchHeaders} className={styles.form}>
           <input
@@ -76,22 +64,24 @@ const HeaderAnalysis = () => {
         {headers && (
           <div className={styles.results}>
             <h3 className={styles.subtitle}>🔍 Headers encontrados:</h3>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Header</th>
-                  <th>Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(headers).map(([key, value]) => (
-                  <tr key={key}>
-                    <td>{key}</td>
-                    <td>{value}</td>
+            <div className={styles.resultBox}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Header</th>
+                    <th>Valor</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {Object.entries(headers).map(([key, value]) => (
+                    <tr key={key}>
+                      <td>{key}</td>
+                      <td>{value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

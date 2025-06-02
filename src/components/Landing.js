@@ -76,16 +76,7 @@ const Landing = () => {
       {/* FOOTER */}
       <footer className={styles.footer}>
         <div className={styles.footerLinks}>
-          <div>
-            <h4>// PRODUCTS</h4>
-            <ul>
-              <li>Monitor</li>
-              <li>Images</li>
-              <li>Maps</li>
-              <li>Reports</li>
-              <li>Alerts</li>
-            </ul>
-          </div>
+          
           <div>
             <h4>// CONTACT</h4>
             <ul>

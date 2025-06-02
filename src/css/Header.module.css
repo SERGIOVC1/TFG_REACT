@@ -9,39 +9,148 @@
   color: white;
   position: sticky;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  backdrop-filter: saturate(180%) blur(10px);
+  transition: background-color 0.3s ease;
+  user-select: none;
 }
 
 .logoContainer {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.9rem;
 }
 
 .menuIcon {
-  height: 24px;
-  width: 24px;
+  height: 28px;
+  width: 28px;
   cursor: pointer;
   filter: invert(1);
-  transition: transform 0.2s ease;
+  transition: filter 0.3s ease; /* Solo cambio de filtro, sin transform */
+  will-change: filter;
 }
 
-.menuIcon:hover {
-  transform: scale(1.1);
+.menuIcon:hover,
+.menuIcon:focus {
+  filter: invert(0.75) brightness(1.1);
+  outline: none;
 }
 
 .brand {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-family: 'Orbitron', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
   cursor: pointer;
   user-select: none;
-  transition: color 0.2s ease;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+  will-change: color, text-shadow;
 }
 
-.brand:hover {
+.brand:hover,
+.brand:focus {
   color: #38bdf8;
+  text-shadow: 0 0 12px #38bdf8aa, 0 0 20px #38bdf8cc;
+  outline: none;
+}
+
+.accountSection {
+  position: relative;
+}
+
+.accountButton {
+  background: transparent;
+  border: 2px solid #38bdf8;
+  padding: 0.4rem 1.2rem;
+  border-radius: 22px;
+  color: #38bdf8;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+  will-change: background-color, color, box-shadow;
+}
+
+.accountButton:hover,
+.accountButton:focus {
+  background-color: #38bdf8;
+  color: #1a1a1a;
+  box-shadow:
+    0 0 8px #38bdf8cc,
+    0 0 20px #38bdf8aa;
+  outline: none;
+}
+
+.dropdownArrow {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-right: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.3s ease;
+  will-change: transform;
+}
+
+.dropdownArrow.open {
+  transform: rotate(-135deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  right: 0;
+  margin-top: 0.6rem;
+  background-color: #0f172a;
+  border-radius: 12px;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.75),
+    inset 0 0 8px #1e293b;
+  padding: 0.75rem 0;
+  min-width: 180px;
+  user-select: none;
+  z-index: 1100;
+  opacity: 0;
+  animation: fadeInScale 0.25s forwards cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top right;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dropdownItem {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 0.6rem 1.5rem;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  user-select: none;
+}
+
+.dropdownItem:hover,
+.dropdownItem:focus {
+  background-color: #1e293b;
+  color: #38bdf8;
+  outline: none;
 }

@@ -1,4 +1,3 @@
-// src/components/NetworkScanForm.js
 import React, { useState } from 'react';
 import { useAuth } from './AuthContext'; // Importar el contexto para obtener userId
 import styles from '../css/NetworkScanForm.module.css';
@@ -138,7 +137,7 @@ const NetworkScanForm = () => {
       </div>
 
       <div className={styles.wrapper}>
-        <h1 className={styles.title}>📡 Escaneo de Red</h1>
+        <h1 className={styles.title}>Escaneo de Red</h1>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <input

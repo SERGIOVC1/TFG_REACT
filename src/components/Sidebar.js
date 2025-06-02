@@ -1,11 +1,25 @@
-// src/components/Sidebar.js
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import styles from "../css/Sidebar.module.css";
 
+const tools = [
+  { path: "/ip", label: "IP Resolver" },
+  { path: "/whois", label: "WHOIS" },
+  { path: "/geo", label: "Geolocalización" },
+  { path: "/holehe", label: "Email Scan" },
+  { path: "/network", label: "Escaneo de Red" },
+  { path: "/dir", label: "Directorios" },
+  { path: "/headers", label: "Headers HTTP" },
+  { path: "/tech", label: "Tech Scanner" },
+  { path: "/traceroute", label: "Traceroute" },
+  { path: "/logger", label: "Link Logger" },
+];
+
 const Sidebar = ({ visible, onLogout, onLinkClick }) => {
+  const location = useLocation();
+
   return (
-    <div
+    <aside
       className={styles.sidebar}
       style={{
         transform: visible ? "translateX(0)" : "translateX(-100%)",
@@ -14,24 +28,33 @@ const Sidebar = ({ visible, onLogout, onLinkClick }) => {
         height: "100%",
         zIndex: 200,
       }}
+      aria-label="Sidebar de navegación"
     >
       <h1 className={styles.logo}>🔒 SecureOps</h1>
+
       <nav>
+        <p className={styles.sectionTitle}>Herramientas</p>
         <ul>
-          <li><Link to="/ip" onClick={onLinkClick} className={styles.toolItem}> IP Resolver</Link></li>
-          <li><Link to="/whois" onClick={onLinkClick} className={styles.toolItem}> WHOIS</Link></li>
-          <li><Link to="/geo" onClick={onLinkClick} className={styles.toolItem}> Geolocalización</Link></li>
-          <li><Link to="/holehe" onClick={onLinkClick} className={styles.toolItem}> Email Scan</Link></li>
-          <li><Link to="/network" onClick={onLinkClick} className={styles.toolItem}> Escaneo de Red</Link></li>
-          <li><Link to="/dir" onClick={onLinkClick} className={styles.toolItem}> Directorios</Link></li>
-          <li><Link to="/headers" onClick={onLinkClick} className={styles.toolItem}> Headers HTTP</Link></li>
-          <li><Link to="/tech" onClick={onLinkClick} className={styles.toolItem}> Tech Scanner</Link></li>
-          <li><Link to="/traceroute" onClick={onLinkClick} className={styles.toolItem}> Traceroute</Link></li>
-          <li><Link to="/logger" onClick={onLinkClick} className={styles.toolItem}> Link Logger</Link></li>
+          {tools.map(({ path, label }) => (
+            <li key={path}>
+              <Link
+                to={path}
+                onClick={onLinkClick}
+                className={`${styles.toolItem} ${
+                  location.pathname === path ? styles.active : ""
+                }`}
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
-      <button className="logout" onClick={onLogout}>Cerrar sesión</button>
-    </div>
+
+      <button className={styles.logoutButton} onClick={onLogout}>
+        Cerrar sesión
+      </button>
+    </aside>
   );
 };
 

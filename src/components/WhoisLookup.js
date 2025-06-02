@@ -122,7 +122,7 @@ function WhoisLookup() {
       </div>
 
       <div className={styles.wrapper}>
-        <h2 className={styles.title}>📄 WHOIS Lookup</h2>
+        <h2 className={styles.title}> WHOIS Lookup</h2>
 
         <div className={styles.form}>
           <input

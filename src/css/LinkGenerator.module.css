@@ -21,12 +21,14 @@
   text-align: center;
   color: white;
   backdrop-filter: blur(2px);
+  box-sizing: border-box;
 }
 
 .title {
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
   color: white;
+  user-select: none;
 }
 
 .input {
@@ -38,10 +40,17 @@
   background-color: #111;
   color: white;
   margin-bottom: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #38bdf8;
 }
 
 .button {
-  background-color: #5995fd;
+  background-color: #38bdf8;
   color: white;
   border: none;
   padding: 0.75rem 1.2rem;
@@ -50,10 +59,13 @@
   cursor: pointer;
   width: 100%;
   transition: background-color 0.3s ease;
+  user-select: none;
 }
 
-.button:hover {
+.button:hover,
+.button:focus {
   background-color: #4d84e2;
+  outline: none;
 }
 
 .button:disabled {
@@ -62,9 +74,10 @@
 }
 
 .error {
-  color: red;
+  color: #ff4c4c;
   margin-top: 1rem;
   font-weight: bold;
+  user-select: none;
 }
 
 .linkBox {
@@ -75,18 +88,28 @@
   border: 1px solid #333;
   color: white;
   word-break: break-word;
+  box-sizing: border-box;
 }
 
 .linkBox a {
   color: #61dafb;
   font-weight: bold;
   word-break: break-word;
+  text-decoration: none;
+}
+
+.linkBox a:hover,
+.linkBox a:focus {
+  text-decoration: underline;
+  outline: none;
 }
 
 .subtitle {
   margin-top: 2rem;
   font-size: 1.2rem;
   font-weight: bold;
+  user-select: none;
+  text-align: left;
 }
 
 .tableWrapper {
@@ -101,6 +124,7 @@
   border-radius: 10px;
   overflow: hidden;
   font-size: 0.9rem;
+  box-sizing: border-box;
 }
 
 .table th,
@@ -114,6 +138,7 @@
 .table th {
   background-color: #1e293b;
   color: #ddd;
+  user-select: none;
 }
 
 .table tr:hover {

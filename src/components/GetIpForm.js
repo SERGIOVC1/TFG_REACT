@@ -92,7 +92,7 @@ const GetIpForm = ({ setResolvedIp }) => {
       </div>
 
       <div className={styles.wrapper}>
-        <h2 className={styles.title}>🌐 Resolver IP de un Dominio</h2>
+        <h2 className={styles.title}> Resolver IP de un Dominio</h2>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <input

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import styles from "../css/Movimientos.module.css";
 
 const Movimientos = ({ userId }) => {
   const [logs, setLogs] = useState([]);
@@ -24,36 +25,41 @@ const Movimientos = ({ userId }) => {
       });
   }, [userId]);
 
-  if (!userId) return <p>Usuario no autenticado.</p>;
-  if (loading) return <p>Cargando movimientos...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (logs.length === 0) return <p>No hay movimientos para este usuario.</p>;
+  if (!userId)
+    return <p className={styles.message}>Usuario no autenticado.</p>;
+  if (loading)
+    return <p className={styles.message}>Cargando movimientos...</p>;
+  if (error) return <p className={styles.error}>Error: {error}</p>;
+  if (logs.length === 0)
+    return <p className={styles.message}>No hay movimientos para este usuario.</p>;
 
   return (
-    <div>
-      <h2>Movimientos del usuario</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Acción</th>
-            <th>Tabla</th>
-            <th>ID Registro</th>
-            <th>Fecha</th>
-            <th>Detalles</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((log, idx) => (
-            <tr key={idx}>
-              <td>{log.action}</td>
-              <td>{log.tableName}</td>
-              <td>{log.recordId}</td>
-              <td>{new Date(log.timestamp).toLocaleString()}</td>
-              <td>{log.details}</td>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Movimientos del usuario</h2>
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Acción</th>
+              <th>Tabla</th>
+              <th>ID Registro</th>
+              <th>Fecha</th>
+              <th>Detalles</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {logs.map((log, idx) => (
+              <tr key={idx}>
+                <td>{log.action}</td>
+                <td>{log.tableName}</td>
+                <td>{log.recordId}</td>
+                <td>{new Date(log.timestamp).toLocaleString()}</td>
+                <td>{log.details}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

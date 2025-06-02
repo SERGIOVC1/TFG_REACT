@@ -114,7 +114,7 @@ const Traceroute = () => {
       </div>
 
       <div className={styles.container}>
-        <h2 className={styles.title}>🛰️ Traceroute Interactivo</h2>
+        <h2 className={styles.title}> Traceroute Interactivo</h2>
 
         <input
           type="text"
@@ -124,7 +124,7 @@ const Traceroute = () => {
           className={styles.input}
         />
         <button onClick={handleTraceroute} className={styles.button} disabled={loading}>
-          🚀 Ejecutar Traceroute
+           Ejecutar Traceroute
         </button>
 
         {loading && <p className={styles.loading}>⏳ Ejecutando...</p>}

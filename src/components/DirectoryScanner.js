@@ -112,7 +112,7 @@ const DirectoryScanner = ({ userId }) => {
       </div>
 
       <div className={styles.wrapper}>
-        <h2 className={styles.title}>📂 Escaneo de Directorios</h2>
+        <h2 className={styles.title}> Escaneo de Directorios</h2>
 
         <input
           type="text"
@@ -131,7 +131,7 @@ const DirectoryScanner = ({ userId }) => {
 
         {showTerminal && (
           <div className={styles.resultContainer}>
-            <h4 className={styles.resultTitle}>📄 Resultado:</h4>
+            <h4 className={styles.resultTitle}> Resultado:</h4>
             <div ref={terminalRef} className={styles.resultBox}>
               {logs.map((log, i) => (
                 <div key={i} dangerouslySetInnerHTML={{ __html: log }} />

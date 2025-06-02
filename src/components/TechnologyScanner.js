@@ -52,7 +52,7 @@ const TechnologyScanner = () => {
       </div>
 
       <div className={styles.container}>
-        <h2 className={styles.title}>🔍 Escáner de Tecnologías Web</h2>
+        <h2 className={styles.title}> Escáner de Tecnologías Web</h2>
 
         <div className={styles.form}>
           <input
@@ -71,7 +71,7 @@ const TechnologyScanner = () => {
 
         {Object.keys(results).length > 0 && (
           <div className={styles.resultsBox}>
-            <h3 className={styles.subtitle}>📦 Tecnologías detectadas:</h3>
+            <h3 className={styles.subtitle}> Tecnologías detectadas:</h3>
             <table className={styles.table}>
               <thead>
                 <tr>

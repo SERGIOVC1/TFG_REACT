@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import styles from "../css/LinkGenerator.module.css";
 import bannerImg from "../assets/banner.avif";
 
@@ -60,8 +60,8 @@ const LinkGenerator = () => {
 
   useEffect(() => {
     if (code) {
-      const interval = setInterval(() => fetchLogs(code), 5000);
       fetchLogs(code);
+      const interval = setInterval(() => fetchLogs(code), 5000);
       return () => clearInterval(interval);
     }
   }, [code]);
@@ -73,7 +73,7 @@ const LinkGenerator = () => {
       </div>
 
       <div className={styles.container}>
-        <h2 className={styles.title}>🎯 Generador de Link Logger</h2>
+        <h2 className={styles.title}>Generador de Link Logger</h2>
 
         <input
           type="text"
@@ -84,7 +84,7 @@ const LinkGenerator = () => {
         />
 
         <button onClick={generateLink} className={styles.button} disabled={loading}>
-          {loading ? "Creando..." : "🎯 Generar Enlace Trampa"}
+          {loading ? "Creando..." : "Generar Enlace Trampa"}
         </button>
 
         {error && <p className={styles.error}>{error}</p>}
@@ -105,8 +105,10 @@ const LinkGenerator = () => {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>IP</th>
+                  <th>IP Cliente</th>
                   <th>User Agent</th>
+                  <th>IP Pública Servidor</th>
+                  <th>IP Local Servidor</th>
                   <th>Hora</th>
                 </tr>
               </thead>
@@ -114,8 +116,10 @@ const LinkGenerator = () => {
                 {logs.map((log, idx) => (
                   <tr key={idx}>
                     <td>{idx + 1}</td>
-                    <td>{log.ip}</td>
+                    <td>{log.clientIp}</td>
                     <td>{log.userAgent}</td>
+                    <td>{log.serverPublicIp}</td>
+                    <td>{log.serverLocalIp}</td>
                     <td>{new Date(log.timestamp).toLocaleString()}</td>
                   </tr>
                 ))}

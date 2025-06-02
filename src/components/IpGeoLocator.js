@@ -84,7 +84,7 @@ function IpGeoLocator() {
 
   return (
     <div className={styles.wrapper}>
-      <h2 className={styles.title}>🌍 Geolocalización de IP</h2>
+      <h2 className={styles.title}> Geolocalización de IP</h2>
 
       <input
         type="text"
