@@ -40,7 +40,7 @@ const Landing = () => {
 
       {/* FEATURE CARDS */}
       <section id="featuresSection" className={styles.features}>
-        <h2>// EXPLORE THE PLATFORM</h2>
+        
         <div className={styles.cardGrid}>
           <div className={styles.card}>
             <h3>🌐 IP Resolver</h3>

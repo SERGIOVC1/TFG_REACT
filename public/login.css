@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
-
 * {
   margin: 0;
   padding: 0;
@@ -9,14 +7,17 @@
 body,
 input {
   font-family: "Poppins", sans-serif;
+  background-color: #0a0a0a;
+  color: #e0e0e0;
 }
 
 .container {
   position: relative;
   width: 100%;
-  background-color: #fff;
+  background-color: #0a0a0a;
   min-height: 100vh;
   overflow: hidden;
+  color: #e0e0e0;
 }
 
 .forms-container {
@@ -49,6 +50,9 @@ form {
   overflow: hidden;
   grid-column: 1 / 2;
   grid-row: 1 / 2;
+  background-color: #121212;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #00ff8844;
 }
 
 form.sign-up-form {
@@ -62,14 +66,15 @@ form.sign-in-form {
 
 .title {
   font-size: 2.2rem;
-  color: #444;
+  color: #00ff88;
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .input-field {
   max-width: 380px;
   width: 100%;
-  background-color: #f0f0f0;
+  background-color: #1a1a1a;
   margin: 10px 0;
   height: 55px;
   border-radius: 55px;
@@ -77,12 +82,13 @@ form.sign-in-form {
   grid-template-columns: 15% 85%;
   padding: 0 0.4rem;
   position: relative;
+  box-shadow: inset 0 0 8px #00ff8833;
 }
 
 .input-field i {
   text-align: center;
   line-height: 55px;
-  color: #acacac;
+  color: #00ff88aa;
   transition: 0.5s;
   font-size: 1.1rem;
 }
@@ -94,17 +100,18 @@ form.sign-in-form {
   line-height: 1;
   font-weight: 600;
   font-size: 1.1rem;
-  color: #333;
+  color: #cceccc;
 }
 
 .input-field input::placeholder {
-  color: #aaa;
+  color: #55aa55;
   font-weight: 500;
 }
 
 .social-text {
   padding: 0.7rem 0;
   font-size: 1rem;
+  color: #a0dca0;
 }
 
 .social-media {
@@ -119,37 +126,40 @@ form.sign-in-form {
   justify-content: center;
   align-items: center;
   margin: 0 0.45rem;
-  color: #333;
+  color: #00ff88;
   border-radius: 50%;
-  border: 1px solid #333;
+  border: 1px solid #00ff88;
   text-decoration: none;
   font-size: 1.1rem;
   transition: 0.3s;
 }
 
 .social-icon:hover {
-  color: #4481eb;
-  border-color: #4481eb;
+  color: #55aa55;
+  border-color: #55aa55;
 }
 
 .btn {
   width: 150px;
-  background-color: #5995fd;
+  background-color: #00ff88;
   border: none;
   outline: none;
   height: 49px;
   border-radius: 49px;
-  color: #fff;
+  color: #0a0a0a;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   margin: 10px 0;
   cursor: pointer;
   transition: 0.5s;
+  box-shadow: 0 0 10px #00ff88aa;
 }
 
 .btn:hover {
-  background-color: #4d84e2;
+  background-color: #00cc6a;
+  box-shadow: 0 0 15px #00cc6acc;
 }
+
 .panels-container {
   position: absolute;
   height: 100%;
@@ -168,7 +178,7 @@ form.sign-in-form {
   top: -10%;
   right: 48%;
   transform: translateY(-50%);
-  background-image: linear-gradient(-45deg, #4481eb 0%, #04befe 100%);
+  background-image: linear-gradient(-45deg, #00ff88 0%, #008844 100%);
   transition: 1.8s ease-in-out;
   border-radius: 50%;
   z-index: 6;
@@ -178,6 +188,7 @@ form.sign-in-form {
   width: 100%;
   transition: transform 1.1s ease-in-out;
   transition-delay: 0.4s;
+  filter: drop-shadow(0 0 10px #00ff88aa);
 }
 
 .panel {
@@ -200,30 +211,39 @@ form.sign-in-form {
 }
 
 .panel .content {
-  color: #fff;
+  color: #fff; /* Cambiado a blanco */
   transition: transform 0.9s ease-in-out;
   transition-delay: 0.6s;
 }
 
 .panel h3 {
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
   font-size: 1.5rem;
+  color: #fff; /* Cambiado a blanco */
 }
 
 .panel p {
   font-size: 0.95rem;
   padding: 0.7rem 0;
+  color: #fff; /* Cambiado a blanco */
 }
 
 .btn.transparent {
   margin: 0;
   background: none;
-  border: 2px solid #fff;
+  border: 2px solid #00ff88;
   width: 130px;
   height: 41px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.8rem;
+  color: #fff; /* Mantener texto blanco */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn.transparent:hover {
+  background-color: #00ff88;
+  color: #0a0a0a;
 }
 
 .right-panel .image,
@@ -270,6 +290,7 @@ form.sign-in-form {
   pointer-events: all;
 }
 
+/* Responsive adjustments */
 @media (max-width: 870px) {
   .container {
     min-height: 800px;
@@ -365,11 +386,6 @@ form.sign-in-form {
   .right-panel .image,
   .right-panel .content {
     transform: translateY(300px);
-  }
-
-  .container.sign-up-mode .signin-signup {
-    top: 5%;
-    transform: translate(-50%, 0);
   }
 }
 
