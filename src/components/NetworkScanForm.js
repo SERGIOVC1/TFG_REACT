@@ -3,13 +3,16 @@ import { useAuth } from './AuthContext';
 import styles from '../css/NetworkScanForm.module.css';
 import bannerImg from '../assets/banner.avif';
 
-// URL base del backend en producción (Render)
-const API_BASE = "https://tfg-backend-wfvn.onrender.com";
+// 🔁 Cambia a "http://localhost:8080" si trabajas en local
+const API_BASE =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8080'
+    : 'https://tfg-backend-wfvn.onrender.com';
 
 const NetworkScanForm = () => {
   const { user } = useAuth();
   const [ipAddress, setIpAddress] = useState('');
-  const [scanType, setScanType] = useState('basic');
+  const [scanType, setScanType] = useState('intermediate');
   const [scanResults, setScanResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -28,6 +31,7 @@ const NetworkScanForm = () => {
 
     setLoading(true);
     setProgress(0);
+
     const interval = setInterval(() => {
       setProgress((prev) => (prev < 90 ? prev + 10 : prev));
     }, 500);
@@ -36,7 +40,11 @@ const NetworkScanForm = () => {
       const response = await fetch(`${API_BASE}/api/network/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target, scanType }),
+        body: JSON.stringify({
+          target,
+          scanType,
+          userId: user?.uid || 'desconocido',
+        }),
       });
 
       const data = await response.json();
@@ -66,7 +74,7 @@ const NetworkScanForm = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: user?.uid || "desconocido",
+            userId: user?.uid || 'desconocido',
             ipAddress: publicIp,
             action: 'Network Scan',
             details: target,
@@ -147,10 +155,17 @@ const NetworkScanForm = () => {
 
         {loading && (
           <div className={styles.loader}>
-            <img src="/Animation - 1738981226902.gif" alt="Cargando..." className={styles.gif} />
+            <img
+              src="/Animation - 1738981226902.gif"
+              alt="Cargando..."
+              className={styles.gif}
+            />
             <p>⏳ Buscando puertos abiertos...</p>
             <div className={styles.progressBarContainer}>
-              <div className={styles.progress} style={{ width: `${progress}%` }} />
+              <div
+                className={styles.progress}
+                style={{ width: `${progress}%` }}
+              />
             </div>
           </div>
         )}
