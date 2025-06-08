@@ -34,31 +34,25 @@ const HeaderAnalysis = () => {
       // Construir parámetros de la consulta
       const queryParams = new URLSearchParams({ url, userId });
 
-      // Realizar petición GET al backend con la URL y el user-agent actual
+      // Realizar petición GET al backend de Render
       const response = await fetch(
-        `http://localhost:8080/api/security/headers?${queryParams.toString()}`,
+        `https://tfg-backend-wfvn.onrender.com/api/security/headers?${queryParams.toString()}`,
         {
           method: "GET",
           headers: {
             "User-Agent": navigator.userAgent,
-            "Content-Type": "application/json",
           },
         }
       );
 
-      // Si la respuesta no fue exitosa, lanzar error
       if (!response.ok) throw new Error("No se pudieron obtener los headers.");
 
-      // Parsear respuesta JSON y guardarla en estado
       const data = await response.json();
       setHeaders(data);
-
     } catch (err) {
-      // Captura de errores y mensaje amigable al usuario
       console.error("❌ Error:", err);
-      setError("Error al obtener los headers. Asegúrate de que la URL es válida y que el backend está corriendo.");
+      setError("Error al obtener los headers. Asegúrate de que la URL es válida.");
     } finally {
-      // Finalizar el estado de carga
       setLoading(false);
     }
   };
@@ -74,7 +68,6 @@ const HeaderAnalysis = () => {
       <div className={styles.container} id="headers">
         <h2 className={styles.title}> Análisis de Headers HTTP</h2>
 
-        {/* Formulario de entrada para analizar una URL */}
         <form onSubmit={handleFetchHeaders} className={styles.form}>
           <input
             type="text"
@@ -89,10 +82,8 @@ const HeaderAnalysis = () => {
           </button>
         </form>
 
-        {/* Mostrar error si ocurre */}
         {error && <p className={styles.error}>{error}</p>}
 
-        {/* Si hay headers disponibles, mostrarlos en una tabla */}
         {headers && (
           <div className={styles.results}>
             <h3 className={styles.subtitle}>🔍 Headers encontrados:</h3>
@@ -105,11 +96,10 @@ const HeaderAnalysis = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Recorre los headers y los muestra como filas */}
                   {Object.entries(headers).map(([key, value]) => (
                     <tr key={key}>
                       <td>{key}</td>
-                      <td>{String(value)}</td>
+                      <td>{value}</td>
                     </tr>
                   ))}
                 </tbody>
