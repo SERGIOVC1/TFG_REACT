@@ -1,5 +1,5 @@
 # Proyecto Web Dinámico - DAW  
-**Alumno:** Sergio [Tu Apellido]  
+**Alumno:** Sergio Velasco Carballido 
 **Ciclo:** Desarrollo de Aplicaciones Web (DAW)
 
 ---
@@ -67,7 +67,7 @@ Ver [Documentación Completa](enlace-a-tu-documentacion.md) (o Notion/Starlight)
 ---
 
 ## Diseño de interfaz (Figma)  
-[Enlace al proyecto Figma](https://www.figma.com/file/xxxxxx)
+[Enlace al proyecto Figma](https://www.figma.com/design/pQ71cGB2ozUoj8Ac0khlbX/Untitled?node-id=1-2&t=PKNIvD1cNlWlzPOo-1)
 
 ---
 
