@@ -82,7 +82,7 @@ Gracias a los profesores y compañeros por el apoyo y feedback. Inspiración de 
 ---
 
 ## Licencias  
-Proyecto bajo licencia MIT (u otra que uses).
+Proyecto bajo licencia MIT.
 
 ---
 
