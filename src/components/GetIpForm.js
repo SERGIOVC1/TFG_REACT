@@ -1,63 +1,67 @@
-// Importación de React y hooks
-import React, { useState, useContext } from "react";
+// Importa React y el hook useState para manejar estado local
+import React, { useState } from "react";
 
-// Estilos específicos del componente
+// Importa estilos CSS en módulo para el componente
 import styles from "../css/GetIpForm.module.css";
 
-// Imagen decorativa (banner)
+// Importa una imagen de banner para el encabezado visual
 import bannerImg from "../assets/banner.avif";
 
-// Importa el contexto de autenticación para acceder al usuario actual
+// Importa el contexto de autenticación para saber qué usuario está conectado
 import { useAuth } from "../components/AuthContext";
 
-// Componente funcional que permite al usuario introducir un dominio y resolver su IP
+// URL del backend desplegado en Azure (reemplaza a localhost)
+const API_URL = "https://tfg-backend-c4d6daajhgfhheb.italynorth-01.azurewebsites.net";
+
+// Componente principal que permite resolver la IP de un dominio
 const GetIpForm = ({ setResolvedIp }) => {
-  const { user } = useAuth(); // Obtiene el usuario actual del contexto (puede ser null si no ha iniciado sesión)
+  const { user } = useAuth(); // Accede al usuario autenticado (si lo hay)
 
-  // Estados locales del componente
-  const [domain, setDomain] = useState("");                 // Dominio ingresado por el usuario
-  const [error, setError] = useState("");                   // Mensaje de error
-  const [userIdDisplayed, setUserIdDisplayed] = useState(""); // Para mostrar el UID del usuario (si existe)
+  // Estados para manejar el dominio ingresado, errores y el ID del usuario
+  const [domain, setDomain] = useState("");
+  const [error, setError] = useState("");
+  const [userIdDisplayed, setUserIdDisplayed] = useState("");
 
-  // Función para extraer el dominio base desde una URL completa (maneja errores)
+  // Función auxiliar para extraer el dominio de una URL completa
   const extractDomain = (url) => {
     try {
       return new URL(url).hostname;
     } catch {
-      return url; // Si no es una URL válida, se devuelve tal cual
+      return url; // Si no es URL válida, devuelve el valor original
     }
   };
 
-  // Función que maneja el envío del formulario
+  // Función principal que se ejecuta al enviar el formulario
   const handleSubmit = async (e) => {
-    e.preventDefault();  // Previene el comportamiento por defecto del formulario
-    setError("");        // Reinicia errores previos
+    e.preventDefault(); // Evita recargar la página
+    setError(""); // Limpia errores anteriores
 
+    // Validación básica del campo
     if (!domain.trim()) {
       setError("Por favor ingresa un dominio válido");
       return;
     }
 
-    const cleanDomain = extractDomain(domain);          // Limpia y extrae el dominio
-    const userId = user?.uid || "desconocido";          // Si el usuario está logueado, usamos su UID
-    setUserIdDisplayed(userId);                         // Mostrar el userId en pantalla
+    // Limpia y extrae solo el dominio, sin protocolo ni ruta
+    const cleanDomain = extractDomain(domain);
+    const userId = user?.uid || "desconocido";
+    setUserIdDisplayed(userId); // Guarda el UID del usuario (si lo hay)
 
     try {
-      // Llamada al backend para resolver la IP del dominio
-      const response = await fetch(
-        `http://localhost:8080/api/ipresolver/resolve-ip?domain=${cleanDomain}`
-      );
+      // Petición al backend para obtener la IP del dominio
+      const response = await fetch(`${API_URL}/api/ipresolver/resolve-ip?domain=${cleanDomain}`);
       const data = await response.json();
 
+      // Si se obtiene una IP válida
       if (data.ip) {
-        setResolvedIp(data.ip);    // Muestra IP resuelta en el componente padre
-        setError("");              // Limpia errores
+        setResolvedIp(data.ip);
+        setError("");
 
-        // Obtener IP pública del cliente
+        // Obtiene la IP pública del cliente (navegador)
         const ipRes = await fetch("https://api.ipify.org?format=json");
         const { ip: publicIp } = await ipRes.json();
 
-        // Obtener localización aproximada
+        // Intenta determinar la ubicación geográfica aproximada
         let location = "Desconocido";
         try {
           const locRes = await fetch("https://ipapi.co/json/");
@@ -67,49 +71,50 @@ const GetIpForm = ({ setResolvedIp }) => {
           console.warn("No se pudo obtener la localización.");
         }
 
-        // Enviar log al backend para registrar la acción del usuario
-        await fetch("http://localhost:8080/api/ipresolver/log", {
+        // Registra la actividad del usuario en el backend
+        await fetch(`${API_URL}/api/ipresolver/log`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ipAddress: publicIp,               // IP pública del cliente
-            internalIpAddress: "localhost",    // IP interna (en este caso simulada)
-            result: data.ip,                   // IP obtenida
-            toolUsed: "ipresolver",            // Herramienta utilizada
-            timestamp: Date.now(),             // Fecha y hora actual
-            userAgent: navigator.userAgent,    // Info del navegador
-            isBot: false,                      // Asume que no es bot
-            location: location,                // Ciudad y país
-            action: "IP Resolver",             // Acción realizada
-            details: cleanDomain,              // Dominio solicitado
-            userId,                            // ID del usuario (si está autenticado)
+            ipAddress: publicIp,
+            internalIpAddress: "localhost", // Simulado: en frontend no puedes obtenerlo realmente
+            result: data.ip,
+            toolUsed: "ipresolver",
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+            isBot: false,
+            location,
+            action: "IP Resolver",
+            details: cleanDomain,
+            userId,
           }),
         });
       } else {
-        // Si no se pudo resolver la IP, se limpian resultados y se muestra error
+        // Si no hay IP devuelta, muestra error
         setResolvedIp("");
         setError("No se pudo resolver la IP del dominio");
         setUserIdDisplayed("");
       }
     } catch (err) {
+      // Captura errores de red o backend
       console.error("Error al obtener la IP:", err);
       setError("Error al conectar con el servidor");
       setUserIdDisplayed("");
     }
   };
 
-  // Renderizado del componente
+  // Render del componente
   return (
     <>
-      {/* Banner superior */}
+      {/* Imagen decorativa del banner */}
       <div className={styles.toolBanner}>
         <img src={bannerImg} alt="Banner IP Resolver" />
       </div>
 
       <div className={styles.wrapper}>
-        <h2 className={styles.title}> Resolver IP de un Dominio</h2>
+        <h2 className={styles.title}>Resolver IP de un Dominio</h2>
 
-        {/* Formulario para ingresar el dominio */}
+        {/* Formulario de entrada del dominio */}
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
             className={styles.input}
@@ -123,10 +128,10 @@ const GetIpForm = ({ setResolvedIp }) => {
           </button>
         </form>
 
-        {/* Mostrar error si existe */}
+        {/* Mensaje de error, si existe */}
         {error && <p className={styles.error}>{error}</p>}
 
-        {/* Mostrar el ID del usuario si está autenticado */}
+        {/* Mostrar el ID del usuario logueado, si lo hay */}
         {userIdDisplayed && (
           <p style={{ marginTop: "1rem", color: "#ccc" }}>
             Usuario: <strong>{userIdDisplayed}</strong>
@@ -137,4 +142,5 @@ const GetIpForm = ({ setResolvedIp }) => {
   );
 };
 
-export default GetIpForm; // Exporta el componente para su uso en otras partes de la app
+// Exporta el componente para que se use en la aplicación
+export default GetIpForm;
