@@ -3,8 +3,8 @@ import { useAuth } from './AuthContext';
 import styles from '../css/NetworkScanForm.module.css';
 import bannerImg from '../assets/banner.avif';
 
-// URL base del backend en producción (Render)
-const API_BASE = "https://tfg-backend-wfvn.onrender.com";
+// ✅ URL actualizada para apuntar a tu VM
+const API_BASE = "http://4.233.138.85:8080";
 
 const NetworkScanForm = () => {
   const { user } = useAuth();
@@ -36,7 +36,7 @@ const NetworkScanForm = () => {
       const response = await fetch(`${API_BASE}/api/network/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target, scanType }),
+        body: JSON.stringify({ target, scanType, userId: user?.uid || "desconocido" }),
       });
 
       const data = await response.json();
