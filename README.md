@@ -87,4 +87,4 @@ Proyecto bajo licencia MIT (u otra que uses).
 ---
 
 ## Contacto  
-Sergio [Apellido] - email@dominio.com - LinkedIn/portfolio  
+Sergio Velasco Carballido - sergiovelascocarballido62@gmail.com - https://www.linkedin.com/in/sergio-velasco-carballido-b6460624a/   
