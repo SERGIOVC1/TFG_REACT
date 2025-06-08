@@ -12,10 +12,9 @@ import styles from "../css/Traceroute.module.css";
 import bannerImg from "../assets/banner.avif";
 import { useAuth } from "../components/AuthContext";
 
-// URL del backend desplegado en Render
 const API_BASE = "https://tfg-backend-wfvn.onrender.com";
 
-// Configuración iconos Leaflet
+// Configuración de iconos Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -69,7 +68,6 @@ const Traceroute = () => {
 
       const response = await fetch(`${API_BASE}/api/traceroute?${params}`);
       const data = await response.json();
-
       setHops(data);
 
       const ipList = data
@@ -121,7 +119,7 @@ const Traceroute = () => {
       </div>
 
       <div className={styles.container}>
-        <h2 className={styles.title}> Traceroute Interactivo</h2>
+        <h2 className={styles.title}>Traceroute Interactivo</h2>
 
         <input
           type="text"
@@ -159,9 +157,7 @@ const Traceroute = () => {
                     <tr key={idx}>
                       <td>{idx + 1}</td>
                       <td>{hop.ip}</td>
-                      <td>
-                        {hop.city}, {hop.country}
-                      </td>
+                      <td>{hop.city}, {hop.country}</td>
                       <td>{hop.org}</td>
                     </tr>
                   ))}
