@@ -3,7 +3,6 @@ import { useAuth } from './AuthContext';
 import styles from '../css/NetworkScanForm.module.css';
 import bannerImg from '../assets/banner.avif';
 
-// 🔁 Cambia a "http://localhost:8080" si trabajas en local
 const API_BASE =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:8080'
@@ -12,7 +11,6 @@ const API_BASE =
 const NetworkScanForm = () => {
   const { user } = useAuth();
   const [ipAddress, setIpAddress] = useState('');
-  const [scanType, setScanType] = useState('intermediate');
   const [scanResults, setScanResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -42,7 +40,7 @@ const NetworkScanForm = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           target,
-          scanType,
+          scanType: 'basic', // 🔒 Escaneo seguro sin root
           userId: user?.uid || 'desconocido',
         }),
       });
