@@ -1,112 +1,97 @@
-// src/components/DirectoryScanner.js
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
+import { useAuth } from "./AuthContext";
 import styles from "../css/DirectoryScanner.module.css";
 import bannerImg from "../assets/banner.avif";
 
-const API_BASE = "https://tfg-backend-wfvn.onrender.com";
+const API_BASE =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:8080"
+    : "https://tfg-backend-wfvn.onrender.com";
 
-const DirectoryScanner = ({ userId }) => {
+function DirectoryScanner() {
+  const { user } = useAuth();
+
   const [target, setTarget] = useState("");
-  const [logs, setLogs] = useState([]);
-  const [scanning, setScanning] = useState(false);
-  const [showTerminal, setShowTerminal] = useState(false);
-
-  const terminalRef = useRef(null);
-  const eventSourceRef = useRef(null);
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleScan = async () => {
-    if (!target.trim()) return;
+    if (!target.trim()) {
+      setError("Introduce una URL válida.");
+      return;
+    }
 
-    setLogs([]);
-    setScanning(true);
-    setShowTerminal(true);
+    setLoading(true);
+    setError("");
+    setResult("");
 
-    const publicIp = await fetch("https://api.ipify.org?format=json")
-      .then(res => res.json())
-      .then(data => data.ip)
-      .catch(() => "Desconocida");
-
-    let location = "Desconocida";
     try {
-      const geo = await fetch("https://ipapi.co/json/");
-      const { city, country_name } = await geo.json();
-      location = `${city}, ${country_name}`;
-    } catch {
-      console.warn("No se pudo obtener la ubicación.");
-    }
+      const ipRes = await fetch("https://api.ipify.org?format=json");
+      const { ip: publicIp } = await ipRes.json();
 
-    const eventSource = new EventSource(
-      `${API_BASE}/api/webscan/directories?target=${encodeURIComponent(target)}&userId=${encodeURIComponent(userId || "")}`
-    );
-
-    eventSource.onmessage = async (event) => {
-      const line = event.data;
-      const logEntry = formatLog(line);
-      setLogs(prev => [...prev, logEntry]);
-
-      const statusMatch = line.match(/\(Status:\s*(\d{3})\)/);
-      if (statusMatch) {
-        const code = parseInt(statusMatch[1]);
-        if (code >= 200 && code < 400) {
-          await fetch(`${API_BASE}/honeypot/log`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ipAddress: publicIp,
-              internalIpAddress: "localhost",
-              action: "Directory Scan",
-              details: target,
-              result: line,
-              toolUsed: "gobuster",
-              timestamp: Date.now(),
-              userAgent: navigator.userAgent,
-              location: location,
-            }),
-          });
-        }
+      let location = "Desconocida";
+      try {
+        const locRes = await fetch("https://ipapi.co/json/");
+        const { city, country_name } = await locRes.json();
+        location = `${city}, ${country_name}`;
+      } catch {
+        console.warn("No se pudo obtener la localización.");
       }
-    };
 
-    eventSource.onerror = () => {
-      eventSource.close();
-      setScanning(false);
-    };
+      const response = await fetch(`${API_BASE}/api/webscan/scan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user?.uid || "desconocido",
+          ipAddress: publicIp,
+          internalIpAddress: "localhost",
+          action: "Directory Scan",
+          details: target.trim(),
+          result: "", // será completado por el backend
+          toolUsed: "gobuster",
+          timestamp: Date.now(),
+          userAgent: navigator.userAgent,
+          isBot: false,
+          location,
+        }),
+      });
 
-    eventSourceRef.current = eventSource;
-  };
-
-  const handleStop = () => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      setScanning(false);
+      const text = await response.text();
+      if (response.ok) {
+        setResult(text);
+      } else {
+        setError("Error durante el escaneo.");
+      }
+    } catch (err) {
+      console.error("❌ Error al conectar con el backend:", err);
+      setError("No se pudo conectar con el backend.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-    }
-  }, [logs]);
+  const renderFormattedResult = () => {
+    return result.split("\n").map((line, index) => {
+      let color = "#ccc";
+      if (/\(Status:\s*2\d{2}\)/.test(line)) color = "limegreen";
+      else if (/\(Status:\s*3\d{2}\)/.test(line)) color = "deepskyblue";
+      else if (/Error/i.test(line)) color = "#ff5252";
 
-  const formatLog = (line) => {
-    const regex = /^(\/\S+)\s+\(Status:\s*(\d+)\)\s+\[Size:\s*(\d+)\](?:\s+\[-->\s*(.*?)\])?/;
-    const match = line.match(regex);
-
-    if (match) {
-      const [_, url, status, size, redirect] = match;
-      let statusClass = "white";
-      if (status.startsWith("2")) statusClass = "green";
-      else if (status.startsWith("3")) statusClass = "blue";
-
-      return `
-        <span class="${styles.url}">${url}</span> 
-        <span class="${styles.status} ${styles[statusClass]}">(Status: ${status})</span>  
-        <span class="${styles.size}">[Size: ${size}]</span>  
-        ${redirect ? `<span class="${styles.redirect}">[→ ${redirect}]</span>` : ""}
-      `;
-    }
-
-    return `<span class="${styles.resultLine}">${line}</span>`;
+      return (
+        <div
+          key={index}
+          style={{
+            color,
+            fontFamily: "monospace",
+            whiteSpace: "pre-wrap",
+            fontSize: "0.9rem",
+          }}
+        >
+          {line}
+        </div>
+      );
+    });
   };
 
   return (
@@ -116,36 +101,31 @@ const DirectoryScanner = ({ userId }) => {
       </div>
 
       <div className={styles.wrapper}>
-        <h2 className={styles.title}> Escaneo de Directorios</h2>
+        <h2 className={styles.title}>🗂️ Escaneo de Directorios</h2>
 
         <input
           type="text"
-          placeholder="Introduce la URL"
+          placeholder="Introduce la URL (ej. https://ejemplo.com)"
           value={target}
           onChange={(e) => setTarget(e.target.value)}
           className={styles.input}
         />
 
-        <button
-          onClick={scanning ? handleStop : handleScan}
-          className={styles.button}
-        >
-          {scanning ? "Detener Escaneo" : "Iniciar Escaneo"}
+        <button onClick={handleScan} className={styles.button} disabled={loading}>
+          {loading ? "Escaneando..." : "Iniciar Escaneo"}
         </button>
 
-        {showTerminal && (
+        {error && <p className={styles.error}>{error}</p>}
+
+        {result && (
           <div className={styles.resultContainer}>
-            <h4 className={styles.resultTitle}> Resultado:</h4>
-            <div ref={terminalRef} className={styles.resultBox}>
-              {logs.map((log, i) => (
-                <div key={i} dangerouslySetInnerHTML={{ __html: log }} />
-              ))}
-            </div>
+            <h4 className={styles.resultTitle}>📄 Resultado:</h4>
+            <div className={styles.resultBox}>{renderFormattedResult()}</div>
           </div>
         )}
       </div>
     </>
   );
-};
+}
 
 export default DirectoryScanner;
