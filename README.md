@@ -62,7 +62,7 @@ Este proyecto consiste en una aplicación web dinámica que integra un backend d
 ---
 
 ## Documentación  
-Ver [Documentación Completa](enlace-a-tu-documentacion.md) (o Notion/Starlight)
+Ver [Documentación Completa](https://docs.google.com/document/d/1MJlXEqgEwfdm9YntPa4SaoyG553ZlBJbXN4u1GUNDQI/edit?usp=sharing) (o Notion/Starlight)
 
 ---
 
