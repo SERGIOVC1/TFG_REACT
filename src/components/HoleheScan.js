@@ -1,23 +1,16 @@
-// Importaciones necesarias de React
 import React, { useState } from "react";
-
-// Importación del contexto de autenticación para obtener el userId
 import { useAuth } from "./AuthContext";
-
-// Importación de estilos CSS específicos del componente
 import styles from "../css/HoleheScan.module.css";
-
-// Imagen decorativa para el banner
 import bannerImg from "../assets/banner.avif";
 
-// URL base del backend desplegado
-const API_BASE = "https://tfg-backend-wfvn.onrender.com";
+// 🔁 Cambia si estás en desarrollo local
+const API_BASE =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:8080"
+    : "https://tfg-backend-wfvn.onrender.com";
 
-// Componente principal del escáner de correos usando la herramienta Holehe
 function HoleheScan() {
-  const { user } = useAuth(); // Obtener el usuario autenticado (o null si no ha iniciado sesión)
-
-  // Estados internos del componente
+  const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,53 +27,43 @@ function HoleheScan() {
     setResult("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/holehe?email=${encodeURIComponent(email.trim())}`);
-      const text = await res.text();
+      // Geolocalización e IP pública
+      const ipRes = await fetch("https://api.ipify.org?format=json");
+      const { ip: publicIp } = await ipRes.json();
 
-      if (res.ok) {
+      let location = "Desconocida";
+      try {
+        const locRes = await fetch("https://ipapi.co/json/");
+        const { city, country_name } = await locRes.json();
+        location = `${city}, ${country_name}`;
+      } catch {
+        console.warn("No se pudo obtener la localización.");
+      }
+
+      // 🔁 Nuevo endpoint POST
+      const response = await fetch(`${API_BASE}/api/holehe/scan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user?.uid || "desconocido",
+          ipAddress: publicIp,
+          internalIpAddress: "localhost",
+          action: "Email Scan",
+          details: email.trim(),
+          result: "", // el backend lo sobrescribe
+          toolUsed: "holehe",
+          timestamp: Date.now(),
+          userAgent: navigator.userAgent,
+          isBot: false,
+          location,
+        }),
+      });
+
+      const text = await response.text();
+      if (response.ok) {
         setResult(text);
-
-        const foundSites = text
-          .split("\n")
-          .filter((line) => line.startsWith("[+]"))
-          .map((line) => {
-            const parts = line.trim().split(" ");
-            return parts[parts.length - 1];
-          });
-
-        const cleanedResult = foundSites.join(", ");
-
-        const ipResponse = await fetch("https://api.ipify.org?format=json");
-        const { ip: publicIp } = await ipResponse.json();
-
-        let location = "Desconocido";
-        try {
-          const geo = await fetch("https://ipapi.co/json/");
-          const { city, country_name } = await geo.json();
-          location = `${city}, ${country_name}`;
-        } catch {
-          console.warn("No se pudo obtener la localización.");
-        }
-
-        await fetch(`${API_BASE}/api/holehe/log`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: user?.uid || "desconocido",
-            ipAddress: publicIp,
-            internalIpAddress: "localhost",
-            action: "Email Scan",
-            details: email.trim(),
-            result: cleanedResult,
-            toolUsed: "holehe",
-            timestamp: Date.now(),
-            userAgent: navigator.userAgent,
-            isBot: false,
-            location,
-          }),
-        });
       } else {
-        setError("Error desde el servidor.");
+        setError("Error al realizar el escaneo.");
       }
     } catch (err) {
       console.error("❌ Error al conectar con el backend:", err);
@@ -91,9 +74,7 @@ function HoleheScan() {
   };
 
   const renderFormattedResult = () => {
-    const lines = result.split("\n");
-
-    return lines.map((line, index) => {
+    return result.split("\n").map((line, index) => {
       let color = "#ccc";
       if (line.startsWith("[+]")) color = "limegreen";
       else if (line.startsWith("[-]")) color = "#ff5252";
