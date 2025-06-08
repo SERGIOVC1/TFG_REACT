@@ -1,11 +1,14 @@
 // src/components/WhoisLookup.js
 import React, { useState } from "react";
-import { useAuth } from "./AuthContext"; // Importa desde components/AuthContext.js
+import { useAuth } from "./AuthContext";
 import styles from "../css/WhoisLookup.module.css";
 import bannerImg from "../assets/banner.avif";
 
+// URL base del backend desplegado en Render
+const API_BASE = "https://tfg-backend-wfvn.onrender.com";
+
 function WhoisLookup() {
-  const { user } = useAuth(); // Obtener usuario logueado
+  const { user } = useAuth();
   const [domain, setDomain] = useState("");
   const [rawResult, setRawResult] = useState("");
   const [filteredResult, setFilteredResult] = useState(null);
@@ -26,9 +29,7 @@ function WhoisLookup() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/whois?domain=${encodeURIComponent(
-          domain.trim()
-        )}`
+        `${API_BASE}/api/whois?domain=${encodeURIComponent(domain.trim())}`
       );
       const data = await response.text();
 
@@ -37,11 +38,9 @@ function WhoisLookup() {
         const parsed = extractImportantInfo(data);
         setFilteredResult(parsed);
 
-        // Obtener IP pública
         const ipRes = await fetch("https://api.ipify.org?format=json");
         const { ip: publicIp } = await ipRes.json();
 
-        // Obtener localización
         let location = "Desconocido";
         try {
           const locRes = await fetch("https://ipapi.co/json/");
@@ -51,12 +50,11 @@ function WhoisLookup() {
           console.warn("No se pudo obtener la localización.");
         }
 
-        // Enviar log al backend con userId
-        await fetch("http://localhost:8080/api/audit", {
+        await fetch(`${API_BASE}/api/audit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId: user?.uid || "desconocido", // UID Firebase o "desconocido"
+            userId: user?.uid || "desconocido",
             action: "WHOIS Lookup",
             tableName: "whois_log",
             recordId: 20,
@@ -86,24 +84,14 @@ function WhoisLookup() {
 
     lines.forEach((line) => {
       if (line.includes("Domain Name:")) info.domain = line.split(":")[1]?.trim();
-      if (
-        line.includes("Registrar:") &&
-        !line.includes("WHOIS Server") &&
-        !info.registrar
-      )
+      if (line.includes("Registrar:") && !line.includes("WHOIS Server") && !info.registrar)
         info.registrar = line.split(":")[1]?.trim();
-      if (line.includes("Registrar URL:"))
-        info.registrarURL = line.split(":")[1]?.trim();
-      if (line.includes("Registrar Abuse Contact Email:"))
-        info.abuseEmail = line.split(":")[1]?.trim();
-      if (line.includes("Registrar Abuse Contact Phone:"))
-        info.abusePhone = line.split(":")[1]?.trim();
-      if (line.includes("Creation Date:"))
-        info.creationDate = line.split(":")[1]?.trim();
-      if (line.includes("Updated Date:"))
-        info.updatedDate = line.split(":")[1]?.trim();
-      if (line.includes("Registry Expiry Date:"))
-        info.expiryDate = line.split(":")[1]?.trim();
+      if (line.includes("Registrar URL:")) info.registrarURL = line.split(":")[1]?.trim();
+      if (line.includes("Registrar Abuse Contact Email:")) info.abuseEmail = line.split(":")[1]?.trim();
+      if (line.includes("Registrar Abuse Contact Phone:")) info.abusePhone = line.split(":")[1]?.trim();
+      if (line.includes("Creation Date:")) info.creationDate = line.split(":")[1]?.trim();
+      if (line.includes("Updated Date:")) info.updatedDate = line.split(":")[1]?.trim();
+      if (line.includes("Registry Expiry Date:")) info.expiryDate = line.split(":")[1]?.trim();
       if (line.includes("Name Server:")) {
         if (!info.nameServers) info.nameServers = [];
         info.nameServers.push(line.split(":")[1]?.trim());
@@ -132,7 +120,6 @@ function WhoisLookup() {
             onChange={(e) => setDomain(e.target.value)}
             className={styles.input}
           />
-
           <button
             onClick={handleLookup}
             disabled={loading}

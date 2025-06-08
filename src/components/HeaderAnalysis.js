@@ -1,113 +1,150 @@
-// Importaciones de React y hooks
-import React, { useState } from "react";
-
-// Estilos específicos del componente
-import styles from "../css/HeaderAnalysis.module.css";
-
-// Imagen del banner decorativo superior
+// Importaciones necesarias de React y recursos locales
+import React, { useState, useEffect, useRef } from "react";
+import styles from "../css/DirectoryScanner.module.css";
 import bannerImg from "../assets/banner.avif";
 
-// Hook de contexto para obtener el usuario actual
-import { useAuth } from "../components/AuthContext";
+// URL del backend desplegado en Render
+const API_BASE = "https://tfg-backend-wfvn.onrender.com";
 
-// Componente funcional para analizar los headers HTTP de un sitio web
-const HeaderAnalysis = () => {
-  const { user } = useAuth(); // Obtiene el usuario autenticado (si existe)
+const DirectoryScanner = ({ userId }) => {
+  const [target, setTarget] = useState("");
+  const [logs, setLogs] = useState([]);
+  const [scanning, setScanning] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(false);
 
-  // Estados del componente
-  const [url, setUrl] = useState("");            // URL ingresada por el usuario
-  const [headers, setHeaders] = useState(null);  // Headers obtenidos del servidor
-  const [error, setError] = useState("");        // Mensaje de error
-  const [loading, setLoading] = useState(false); // Indicador de carga durante la petición
+  const terminalRef = useRef(null);
+  const eventSourceRef = useRef(null);
 
-  // Función para manejar el envío del formulario
-  const handleFetchHeaders = async (e) => {
-    e.preventDefault();            // Prevenir comportamiento por defecto del form
-    setError("");                  // Limpiar errores anteriores
-    setHeaders(null);             // Limpiar headers anteriores
-    setLoading(true);             // Activar estado de carga
+  const handleScan = async () => {
+    if (!target.trim()) return;
 
+    setLogs([]);
+    setScanning(true);
+    setShowTerminal(true);
+
+    // Obtener IP pública
+    const publicIp = await fetch("https://api.ipify.org?format=json")
+      .then((res) => res.json())
+      .then((data) => data.ip)
+      .catch(() => "Desconocida");
+
+    // Obtener ubicación
+    let location = "Desconocida";
     try {
-      // Obtener el UID del usuario o marcar como "desconocido"
-      const userId = user?.uid || "desconocido";
+      const geo = await fetch("https://ipapi.co/json/");
+      const { city, country_name } = await geo.json();
+      location = `${city}, ${country_name}`;
+    } catch {
+      console.warn("No se pudo obtener la ubicación.");
+    }
 
-      // Construir parámetros de la consulta
-      const queryParams = new URLSearchParams({ url, userId });
+    // Conexión SSE al backend en Render
+    const eventSource = new EventSource(
+      `${API_BASE}/api/webscan/directories?target=${encodeURIComponent(target)}&userId=${encodeURIComponent(userId || "")}`
+    );
 
-      // Realizar petición GET al backend con la URL y el user-agent actual
-      const response = await fetch(
-        `http://localhost:8080/api/security/headers?${queryParams.toString()}`,
-        { method: "GET", headers: { "User-Agent": navigator.userAgent } }
-      );
+    eventSource.onmessage = async (event) => {
+      const line = event.data;
+      const logEntry = formatLog(line);
+      setLogs((prev) => [...prev, logEntry]);
 
-      // Si la respuesta no fue exitosa, lanzar error
-      if (!response.ok) throw new Error("No se pudieron obtener los headers.");
+      const statusMatch = line.match(/\(Status:\s*(\d{3})\)/);
+      if (statusMatch) {
+        const code = parseInt(statusMatch[1]);
+        if (code >= 200 && code < 400) {
+          await fetch(`${API_BASE}/honeypot/log`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ipAddress: publicIp,
+              internalIpAddress: "localhost",
+              action: "Directory Scan",
+              details: target,
+              result: line,
+              toolUsed: "gobuster",
+              timestamp: Date.now(),
+              userAgent: navigator.userAgent,
+              location,
+            }),
+          });
+        }
+      }
+    };
 
-      // Parsear respuesta JSON y guardarla en estado
-      const data = await response.json();
-      setHeaders(data);
+    eventSource.onerror = () => {
+      eventSource.close();
+      setScanning(false);
+    };
 
-    } catch (err) {
-      // Captura de errores y mensaje amigable al usuario
-      console.error("❌ Error:", err);
-      setError("Error al obtener los headers. Asegúrate de que la URL es válida.");
-    } finally {
-      // Finalizar el estado de carga
-      setLoading(false);
+    eventSourceRef.current = eventSource;
+  };
+
+  const handleStop = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      setScanning(false);
     }
   };
 
-  // Render del componente
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [logs]);
+
+  const formatLog = (line) => {
+    const regex =
+      /^(\/\S+)\s+\(Status:\s*(\d+)\)\s+\[Size:\s*(\d+)\](?:\s+\[-->\s*(.*?)\])?/;
+    const match = line.match(regex);
+
+    if (match) {
+      const [_, url, status, size, redirect] = match;
+      let statusClass = "white";
+      if (status.startsWith("2")) statusClass = "green";
+      else if (status.startsWith("3")) statusClass = "blue";
+
+      return `
+        <span class="${styles.url}">${url}</span> 
+        <span class="${styles.status} ${styles[statusClass]}">(Status: ${status})</span>  
+        <span class="${styles.size}">[Size: ${size}]</span>  
+        ${redirect ? `<span class="${styles.redirect}">[→ ${redirect}]</span>` : ""}
+      `;
+    }
+
+    return `<span class="${styles.resultLine}">${line}</span>`;
+  };
+
   return (
     <>
-      {/* Banner decorativo */}
       <div className={styles.toolBanner}>
-        <img src={bannerImg} alt="Banner Header Analysis" />
+        <img src={bannerImg} alt="Banner Directory Scan" />
       </div>
 
-      <div className={styles.container} id="headers">
-        <h2 className={styles.title}> Análisis de Headers HTTP</h2>
+      <div className={styles.wrapper}>
+        <h2 className={styles.title}> Escaneo de Directorios</h2>
 
-        {/* Formulario de entrada para analizar una URL */}
-        <form onSubmit={handleFetchHeaders} className={styles.form}>
-          <input
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Introduce una URL (https://example.com)"
-            className={styles.input}
-            required
-          />
-          <button type="submit" className={styles.button} disabled={loading}>
-            {loading ? "Analizando..." : "Analizar Headers"}
-          </button>
-        </form>
+        <input
+          type="text"
+          placeholder="Introduce la URL"
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+          className={styles.input}
+        />
 
-        {/* Mostrar error si ocurre */}
-        {error && <p className={styles.error}>{error}</p>}
+        <button
+          onClick={scanning ? handleStop : handleScan}
+          className={styles.button}
+        >
+          {scanning ? "Detener Escaneo" : "Iniciar Escaneo"}
+        </button>
 
-        {/* Si hay headers disponibles, mostrarlos en una tabla */}
-        {headers && (
-          <div className={styles.results}>
-            <h3 className={styles.subtitle}>🔍 Headers encontrados:</h3>
-            <div className={styles.resultBox}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Header</th>
-                    <th>Valor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Recorre los headers y los muestra como filas */}
-                  {Object.entries(headers).map(([key, value]) => (
-                    <tr key={key}>
-                      <td>{key}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {showTerminal && (
+          <div className={styles.resultContainer}>
+            <h4 className={styles.resultTitle}> Resultado:</h4>
+            <div ref={terminalRef} className={styles.resultBox}>
+              {logs.map((log, i) => (
+                <div key={i} dangerouslySetInnerHTML={{ __html: log }} />
+              ))}
             </div>
           </div>
         )}
@@ -116,4 +153,4 @@ const HeaderAnalysis = () => {
   );
 };
 
-export default HeaderAnalysis; // Exportar el componente para uso externo
+export default DirectoryScanner;

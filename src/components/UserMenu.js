@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 
+// URL del backend en producción (Render)
+const API_BASE = "https://tfg-backend-wfvn.onrender.com";
+
 const UserMenu = ({ userId }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [auditLogs, setAuditLogs] = useState([]);
@@ -10,7 +13,7 @@ const UserMenu = ({ userId }) => {
   useEffect(() => {
     if (userId && showDropdown) {
       setLoading(true);
-      fetch(`http://localhost:8080/api/audit/user/${userId}`)
+      fetch(`${API_BASE}/api/audit/user/${userId}`)
         .then((res) => res.json())
         .then((data) => {
           setAuditLogs(data);
@@ -49,7 +52,14 @@ const UserMenu = ({ userId }) => {
 
           <ul style={{ listStyle: "none", padding: "0 10px", margin: 0 }}>
             {auditLogs.map((log, idx) => (
-              <li key={idx} style={{ marginBottom: "10px", borderBottom: "1px solid #ccc", paddingBottom: "5px" }}>
+              <li
+                key={idx}
+                style={{
+                  marginBottom: "10px",
+                  borderBottom: "1px solid #ccc",
+                  paddingBottom: "5px",
+                }}
+              >
                 <strong>Acción:</strong> {log.action} <br />
                 <strong>Tabla:</strong> {log.tableName} <br />
                 <strong>Detalles:</strong> {log.details} <br />

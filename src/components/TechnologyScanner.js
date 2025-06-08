@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import styles from "../css/TechnologyScanner.module.css";
 import bannerImg from "../assets/banner.avif";
-// Importa el hook useAuth para obtener userId
 import { useAuth } from "../components/AuthContext";
+
+// URL base del backend en Render
+const API_BASE = "https://tfg-backend-wfvn.onrender.com";
 
 const TechnologyScanner = () => {
   const { user } = useAuth();
@@ -17,14 +19,13 @@ const TechnologyScanner = () => {
     setResults({});
 
     try {
-      // Añadir userId al query params si tienes (opcional)
       const userId = user?.uid || "desconocido";
       const params = new URLSearchParams({
         domain,
         userId,
       });
 
-      const response = await fetch(`http://localhost:8080/api/tech-scan?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/api/tech-scan?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error("Error en la respuesta del servidor.");

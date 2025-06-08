@@ -10,7 +10,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import styles from "../css/Traceroute.module.css";
 import bannerImg from "../assets/banner.avif";
-import { useAuth } from "../components/AuthContext"; // Ajusta según tu proyecto
+import { useAuth } from "../components/AuthContext";
+
+// URL del backend desplegado en Render
+const API_BASE = "https://tfg-backend-wfvn.onrender.com";
 
 // Configuración iconos Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -31,7 +34,8 @@ const Traceroute = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const normalizeTarget = (input) => input.replace(/^https?:\/\//, "").split("/")[0];
+  const normalizeTarget = (input) =>
+    input.replace(/^https?:\/\//, "").split("/")[0];
 
   const getProviderName = (org) => {
     const lower = (org || "").toLowerCase();
@@ -61,13 +65,9 @@ const Traceroute = () => {
     try {
       const cleanTarget = normalizeTarget(target);
       const userId = user?.uid || "desconocido";
+      const params = new URLSearchParams({ target: cleanTarget, userId });
 
-      const params = new URLSearchParams({
-        target: cleanTarget,
-        userId,
-      });
-
-      const response = await fetch(`http://localhost:8080/api/traceroute?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/api/traceroute?${params}`);
       const data = await response.json();
 
       setHops(data);
@@ -90,7 +90,14 @@ const Traceroute = () => {
               country: info.country || "Desconocido",
             };
           } catch {
-            return { ip, lat: null, lon: null, org: "Desconocido", city: "?", country: "?" };
+            return {
+              ip,
+              lat: null,
+              lon: null,
+              org: "Desconocido",
+              city: "?",
+              country: "?",
+            };
           }
         })
       );
@@ -123,8 +130,12 @@ const Traceroute = () => {
           placeholder="ej. google.com"
           className={styles.input}
         />
-        <button onClick={handleTraceroute} className={styles.button} disabled={loading}>
-           Ejecutar Traceroute
+        <button
+          onClick={handleTraceroute}
+          className={styles.button}
+          disabled={loading}
+        >
+          Ejecutar Traceroute
         </button>
 
         {loading && <p className={styles.loading}>⏳ Ejecutando...</p>}
@@ -148,7 +159,9 @@ const Traceroute = () => {
                     <tr key={idx}>
                       <td>{idx + 1}</td>
                       <td>{hop.ip}</td>
-                      <td>{hop.city}, {hop.country}</td>
+                      <td>
+                        {hop.city}, {hop.country}
+                      </td>
                       <td>{hop.org}</td>
                     </tr>
                   ))}
@@ -157,7 +170,12 @@ const Traceroute = () => {
             </div>
 
             <div className={styles.mapWrapper}>
-              <MapContainer center={center} zoom={2} scrollWheelZoom={true} className={styles.map}>
+              <MapContainer
+                center={center}
+                zoom={2}
+                scrollWheelZoom={true}
+                className={styles.map}
+              >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -165,9 +183,12 @@ const Traceroute = () => {
                 {geoHops.map((hop, idx) => (
                   <Marker key={idx} position={[hop.lat, hop.lon]}>
                     <Popup>
-                      <strong>Salto {idx + 1}</strong><br />
-                      IP: {hop.ip}<br />
-                      {hop.city}, {hop.country}<br />
+                      <strong>Salto {idx + 1}</strong>
+                      <br />
+                      IP: {hop.ip}
+                      <br />
+                      {hop.city}, {hop.country}
+                      <br />
                       Proveedor: {hop.org}
                     </Popup>
                   </Marker>

@@ -1,36 +1,26 @@
-// Importación de React y hooks
 import React, { useState } from 'react';
-
-// Contexto de autenticación para obtener el UID del usuario
 import { useAuth } from './AuthContext';
-
-// Estilos específicos para el formulario de escaneo
 import styles from '../css/NetworkScanForm.module.css';
-
-// Imagen de banner decorativa
 import bannerImg from '../assets/banner.avif';
 
-// Componente principal que permite realizar escaneos de red (Nmap)
+// URL base del backend en producción (Render)
+const API_BASE = "https://tfg-backend-wfvn.onrender.com";
+
 const NetworkScanForm = () => {
-  const { user } = useAuth();  // Usuario autenticado
+  const { user } = useAuth();
+  const [ipAddress, setIpAddress] = useState('');
+  const [scanType, setScanType] = useState('basic');
+  const [scanResults, setScanResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  // Estados del formulario
-  const [ipAddress, setIpAddress] = useState('');         // Dirección IP o dominio ingresado
-  const [scanType, setScanType] = useState('basic');      // Tipo de escaneo (fijo aquí como 'basic')
-  const [scanResults, setScanResults] = useState([]);     // Resultados procesados
-  const [loading, setLoading] = useState(false);          // Indicador de carga
-  const [progress, setProgress] = useState(0);            // Porcentaje de progreso del escaneo
-
-  // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!ipAddress) {
       alert('⚠️ Por favor ingresa una dirección IP o URL válida.');
       return;
     }
 
-    // Si se detecta que es una URL, extrae solo el dominio
     let target = ipAddress;
     if (isValidUrl(ipAddress)) {
       target = extractDomain(ipAddress);
@@ -38,18 +28,15 @@ const NetworkScanForm = () => {
 
     setLoading(true);
     setProgress(0);
-
-    // Simula una barra de progreso mientras se escanea
     const interval = setInterval(() => {
       setProgress((prev) => (prev < 90 ? prev + 10 : prev));
     }, 500);
 
     try {
-      // Petición al backend para iniciar el escaneo
-      const response = await fetch('http://localhost:8080/api/network/scan', {
+      const response = await fetch(`${API_BASE}/api/network/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target: target, scanType: scanType }),
+        body: JSON.stringify({ target, scanType }),
       });
 
       const data = await response.json();
@@ -57,64 +44,53 @@ const NetworkScanForm = () => {
       if (data.error) {
         alert(data.error);
         setScanResults([]);
+      } else if (data.result) {
+        const parsedResults = parseScanResult(data.result);
+        setScanResults(parsedResults);
+
+        let publicIp = 'Desconocida';
+        try {
+          const ipRes = await fetch('https://api.ipify.org?format=json');
+          const ipData = await ipRes.json();
+          publicIp = ipData.ip || 'Desconocida';
+        } catch {}
+
+        let location = 'Desconocida';
+        try {
+          const locRes = await fetch('https://ipapi.co/json/');
+          const locData = await locRes.json();
+          location = `${locData.city}, ${locData.country_name}`;
+        } catch {}
+
+        await fetch(`${API_BASE}/api/network/log`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user?.uid || "desconocido",
+            ipAddress: publicIp,
+            action: 'Network Scan',
+            details: target,
+            result: data.result,
+            toolUsed: 'network_scan',
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+            isBot: false,
+            location,
+          }),
+        });
       } else {
-        if (data && data.result) {
-          // Procesa el resultado plano del escaneo
-          const parsedResults = parseScanResult(data.result);
-          setScanResults(parsedResults);
-
-          // Obtiene la IP pública del cliente
-          let publicIp = 'Desconocida';
-          try {
-            const ipRes = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipRes.json();
-            publicIp = ipData.ip || 'Desconocida';
-          } catch (err) {
-            console.warn('No se pudo obtener IP pública');
-          }
-
-          // Obtiene la ubicación del cliente
-          let location = 'Desconocida';
-          try {
-            const locRes = await fetch('https://ipapi.co/json/');
-            const locData = await locRes.json();
-            location = `${locData.city}, ${locData.country_name}`;
-          } catch (err) {
-            console.warn('No se pudo obtener la localización');
-          }
-
-          // Envío de log al backend con metadatos del escaneo
-          await fetch('http://localhost:8080/api/network/log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: user?.uid || "desconocido",
-              ipAddress: publicIp,
-              action: 'Network Scan',
-              details: target,
-              result: data.result,
-              toolUsed: 'network_scan',
-              timestamp: Date.now(),
-              userAgent: navigator.userAgent,
-              isBot: false,
-              location: location,
-            }),
-          });
-        } else {
-          setScanResults([]);
-        }
+        setScanResults([]);
       }
     } catch (error) {
       console.error('❌ Error al realizar el escaneo:', error);
       alert('Error al realizar el escaneo. Intenta nuevamente.');
     }
 
-    clearInterval(interval);  // Detiene la barra de progreso simulada
-    setProgress(100);         // Progreso completo
-    setTimeout(() => setLoading(false), 500);  // Oculta carga tras breve espera
+    clearInterval(interval);
+    setProgress(100);
+    setTimeout(() => setLoading(false), 500);
   };
 
-  // Verifica si el texto ingresado es una URL válida
   const isValidUrl = (str) => {
     const pattern = new RegExp(
       '^(https?:\\/\\/)?([a-z0-9-]+\\.)+[a-z0-9]{2,4}(:[0-9]{1,5})?(\\/.*)?$',
@@ -123,7 +99,6 @@ const NetworkScanForm = () => {
     return pattern.test(str);
   };
 
-  // Extrae el dominio principal de una URL
   const extractDomain = (url) => {
     try {
       return new URL(url).hostname;
@@ -132,35 +107,29 @@ const NetworkScanForm = () => {
     }
   };
 
-  // Parsea el resultado del escaneo (tipo Nmap) para obtener puertos, estados y servicios
   const parseScanResult = (scanResult) => {
     const lines = scanResult.split('\n');
-    const parsedData = [];
-
-    lines.forEach((line) => {
-      const match = line.match(/(\d+\/tcp)\s+(\w+)\s+(\S+)/);
-      if (match) {
-        const [_, port, state, service] = match;
-        parsedData.push({ port, state, service });
-      }
-    });
-
-    return parsedData;
+    return lines
+      .map((line) => {
+        const match = line.match(/(\d+\/tcp)\s+(\w+)\s+(\S+)/);
+        if (match) {
+          const [_, port, state, service] = match;
+          return { port, state, service };
+        }
+        return null;
+      })
+      .filter(Boolean);
   };
 
-  // Render del componente
   return (
     <>
-      {/* Banner superior */}
       <div className={styles.toolBanner}>
         <img src={bannerImg} alt="Banner de escaneo de red" />
       </div>
 
-      {/* Formulario e interfaz de escaneo */}
       <div className={styles.wrapper}>
         <h1 className={styles.title}>Escaneo de Red</h1>
 
-        {/* Formulario para ingresar IP o dominio */}
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
             type="text"
@@ -176,7 +145,6 @@ const NetworkScanForm = () => {
           </button>
         </form>
 
-        {/* Barra de carga y animación durante el escaneo */}
         {loading && (
           <div className={styles.loader}>
             <img src="/Animation - 1738981226902.gif" alt="Cargando..." className={styles.gif} />
@@ -187,7 +155,6 @@ const NetworkScanForm = () => {
           </div>
         )}
 
-        {/* Resultados del escaneo (tabla) */}
         {!loading && scanResults.length > 0 && (
           <div className={styles.resultContainer}>
             <h2 className={styles.resultTitle}>📊 Resultados del Escaneo</h2>
@@ -212,7 +179,6 @@ const NetworkScanForm = () => {
           </div>
         )}
 
-        {/* Mensaje si no hubo resultados */}
         {!loading && scanResults.length === 0 && (
           <p className={styles.noResults}>No hay resultados para mostrar.</p>
         )}
@@ -221,4 +187,4 @@ const NetworkScanForm = () => {
   );
 };
 
-export default NetworkScanForm;  // Exporta el componente
+export default NetworkScanForm;
