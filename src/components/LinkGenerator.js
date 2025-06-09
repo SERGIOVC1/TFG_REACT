@@ -1,16 +1,10 @@
-// Importación de React y hooks
 import React, { useState, useEffect } from "react";
-
-// Importación de estilos CSS específicos del componente
 import styles from "../css/LinkGenerator.module.css";
-
-// Imagen decorativa del banner superior
 import bannerImg from "../assets/banner.avif";
 
-// URL del backend desplegado en Render
+// Cambia este valor al dominio real que usas en Render
 const API_BASE = "https://tfg-backend-wfvn.onrender.com";
 
-// Componente principal que genera enlaces trampa y muestra accesos
 const LinkGenerator = () => {
   const [originalUrl, setOriginalUrl] = useState("");
   const [shortened, setShortened] = useState(null);
@@ -27,6 +21,8 @@ const LinkGenerator = () => {
 
     setLoading(true);
     setError("");
+    setShortened(null);
+    setCode(null);
 
     try {
       const res = await fetch(`${API_BASE}/api/link`, {
@@ -35,15 +31,21 @@ const LinkGenerator = () => {
         body: JSON.stringify({ url: originalUrl }),
       });
 
+      if (!res.ok) throw new Error("Error en la respuesta del backend");
+
       const data = await res.json();
-      setShortened(data.shortened);
+
+      // ⚠️ Asegúrate que el backend devuelve una URL absoluta válida desde Render
+      const finalShortened = `https://tfg-backend-wfvn.onrender.com/api/link/go/${data.code}`;
+
+      setShortened(finalShortened);
       setCode(data.code);
 
-      localStorage.setItem("iplogger_shortened", data.shortened);
+      localStorage.setItem("iplogger_shortened", finalShortened);
       localStorage.setItem("iplogger_code", data.code);
     } catch (err) {
-      setError("❌ Error al generar el enlace.");
-      console.error(err);
+      console.error("❌ Error al generar el enlace:", err);
+      setError("❌ No se pudo generar el enlace.");
     } finally {
       setLoading(false);
     }
@@ -52,6 +54,7 @@ const LinkGenerator = () => {
   const fetchLogs = async (codeParam) => {
     try {
       const res = await fetch(`${API_BASE}/api/link/logs/${codeParam}`);
+      if (!res.ok) return;
       const data = await res.json();
       setLogs(data);
     } catch (err) {
