@@ -1,69 +1,36 @@
-/* Reset básico y tipografía */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
   background-color: #f4f4f9;
-  color: #333;
-  line-height: 1.6;
 }
 
-/* Header centrado con padding */
 .App-header {
   text-align: center;
   padding: 20px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Estilo para formularios */
 form {
   margin: 20px auto;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 90%;
-  max-width: 400px;
+  width: 300px;
   background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* Tablas centradas y estilizadas */
 table {
   margin: 20px auto;
   border-collapse: collapse;
-  width: 95%;
-  max-width: 900px;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  width: 80%;
 }
 
-/* Bordes y espaciado para tabla, celdas y encabezados */
 table, th, td {
   border: 1px solid #ccc;
   padding: 10px;
   text-align: left;
 }
 
-/* Fondo claro para encabezados */
 th {
   background-color: #f9f9f9;
-  font-weight: 600;
-}
-
-/* Celdas con color alterno para filas */
-tbody tr:nth-child(even) {
-  background-color: #fefefe;
-}
-
-/* Responsividad: tablas y formularios adaptan ancho */
-@media (max-width: 600px) {
-  form, table {
-    width: 100%;
-    margin: 10px 0;
-  }
-  
-  table, th, td {
-    font-size: 14px;
-  }
 }
