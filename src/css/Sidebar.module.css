@@ -7,6 +7,7 @@
   overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
   user-select: none;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -44,6 +45,9 @@ nav a {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
   transition: transform 0.2s ease, background-color 0.3s ease;
   user-select: none;
+  white-space: nowrap; /* Evita que el texto se rompa */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Muestra "..." si el texto es muy largo */
 }
 
 nav a:hover,
@@ -96,8 +100,21 @@ nav a:focus {
   box-shadow: 0 6px 18px rgba(220, 38, 38, 0.9);
 }
 
+/* Responsive para móviles y tablets */
 @media (max-width: 768px) {
   .sidebar {
     width: 180px;
+    padding: 1rem 0.5rem;
+  }
+
+  nav a {
+    white-space: normal; /* Permite que el texto se rompa en varias líneas */
+    overflow: visible;   /* Evita cortar el texto */
+    text-overflow: clip; /* Desactiva los "..." */
+    padding: 0.7rem 0.75rem;
+  }
+
+  .sectionTitle {
+    padding-left: 0;
   }
 }
