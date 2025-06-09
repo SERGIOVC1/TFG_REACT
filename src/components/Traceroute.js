@@ -12,10 +12,10 @@ import styles from "../css/Traceroute.module.css";
 import bannerImg from "../assets/banner.avif";
 import { useAuth } from "../components/AuthContext";
 
-// URL del backend desplegado en Render
+// Backend desplegado en Render
 const API_BASE = "https://tfg-backend-wfvn.onrender.com";
 
-// Configuración iconos Leaflet
+// Configuración de iconos por defecto de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -29,7 +29,6 @@ L.Icon.Default.mergeOptions({
 const Traceroute = () => {
   const { user } = useAuth();
   const [target, setTarget] = useState("");
-  const [hops, setHops] = useState([]);
   const [geoHops, setGeoHops] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -59,7 +58,6 @@ const Traceroute = () => {
 
     setLoading(true);
     setError("");
-    setHops([]);
     setGeoHops([]);
 
     try {
@@ -68,13 +66,11 @@ const Traceroute = () => {
       const params = new URLSearchParams({ target: cleanTarget, userId });
 
       const response = await fetch(`${API_BASE}/api/traceroute?${params}`);
-      const data = await response.json();
-
-      setHops(data);
+      const data = await response.json(); // ejemplo: ["1 192.168.1.1", "2 8.8.8.8", ...]
 
       const ipList = data
-        .map((line) => line.match(/(\d{1,3}\.){3}\d{1,3}/)?.[0] || null)
-        .filter((ip) => ip && ip !== "*");
+        .map((line) => line.match(/(\d{1,3}\.){3}\d{1,3}/)?.[0])
+        .filter(Boolean);
 
       const geos = await Promise.all(
         ipList.map(async (ip) => {
@@ -121,7 +117,7 @@ const Traceroute = () => {
       </div>
 
       <div className={styles.container}>
-        <h2 className={styles.title}> Traceroute Interactivo</h2>
+        <h2 className={styles.title}>Traceroute Interactivo</h2>
 
         <input
           type="text"
@@ -141,7 +137,7 @@ const Traceroute = () => {
         {loading && <p className={styles.loading}>⏳ Ejecutando...</p>}
         {error && <p className={styles.error}>{error}</p>}
 
-        {hops.length > 0 && (
+        {geoHops.length > 0 && (
           <>
             <div className={styles.tableContainer}>
               <h3 className={styles.subtitle}>📍 Saltos:</h3>
@@ -173,7 +169,7 @@ const Traceroute = () => {
               <MapContainer
                 center={center}
                 zoom={2}
-                scrollWheelZoom={true}
+                scrollWheelZoom
                 className={styles.map}
               >
                 <TileLayer
