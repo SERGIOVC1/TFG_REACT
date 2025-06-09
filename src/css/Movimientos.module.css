@@ -2,8 +2,7 @@
   max-width: 900px;
   margin: 2rem auto;
   padding: 2rem;
-  background: rgba(15, 23, 42, 0.95);
-  background-color: #1a1a1a;
+  background: #1a1a1a;
   background-size: cover;
   background-repeat: repeat;
   background-blend-mode: overlay;
@@ -12,6 +11,7 @@
   color: white;
   backdrop-filter: blur(2px);
   box-sizing: border-box;
+  overflow-x: hidden; /* evita scroll horizontal general */
 }
 
 .title {
@@ -23,11 +23,13 @@
 }
 
 .tableWrapper {
-  overflow-x: auto;
+  overflow-x: auto; /* scroll horizontal solo para tablas que no quepan */
+  -webkit-overflow-scrolling: touch; /* suaviza scroll en móviles */
 }
 
 .table {
   width: 100%;
+  min-width: 700px; /* fuerza mínimo ancho para columnas */
   border-collapse: collapse;
   background-color: #0f172a;
   border-radius: 12px;
@@ -43,6 +45,7 @@
   color: white;
   font-size: 0.9rem;
   user-select: text;
+  white-space: nowrap; /* evita que el texto se rompa y la tabla se comprima */
 }
 
 .table th {
