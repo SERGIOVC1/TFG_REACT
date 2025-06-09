@@ -227,3 +227,20 @@
     gap: 0.5rem;
   }
 }
+
+/* Mobile very small screens */
+@media (max-width: 480px) {
+  .heroText h1 {
+    font-size: 2rem;
+  }
+
+  .heroText button {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+
+  .buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
