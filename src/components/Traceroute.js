@@ -66,7 +66,13 @@ const Traceroute = () => {
       const params = new URLSearchParams({ target: cleanTarget, userId });
 
       const response = await fetch(`${API_BASE}/api/traceroute?${params}`);
-      const data = await response.json(); // ejemplo: ["1 192.168.1.1", "2 8.8.8.8", ...]
+      const data = await response.json();
+
+      // Si el backend devuelve un mensaje de error
+      if (data.length && typeof data[0] === "string" && data[0].startsWith("Error al ejecutar traceroute")) {
+        setError(data[0]);
+        return;
+      }
 
       const ipList = data
         .map((line) => line.match(/(\d{1,3}\.){3}\d{1,3}/)?.[0])
@@ -101,7 +107,7 @@ const Traceroute = () => {
       setGeoHops(geos.filter((g) => g.lat && g.lon));
     } catch (err) {
       console.error(err);
-      setError("❌ Error al ejecutar traceroute.");
+      setError("❌ Error inesperado al ejecutar traceroute.");
     } finally {
       setLoading(false);
     }
