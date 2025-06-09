@@ -1,8 +1,10 @@
+/* Tu CSS base sin cambios */
 .container {
   max-width: 900px;
   margin: 2rem auto;
   padding: 2rem;
-  background: #1a1a1a;
+  background: rgba(15, 23, 42, 0.95);
+  background-color: #1a1a1a;
   background-size: cover;
   background-repeat: repeat;
   background-blend-mode: overlay;
@@ -11,7 +13,6 @@
   color: white;
   backdrop-filter: blur(2px);
   box-sizing: border-box;
-  overflow-x: hidden; /* evita scroll horizontal general */
 }
 
 .title {
@@ -23,18 +24,18 @@
 }
 
 .tableWrapper {
-  overflow-x: auto; /* scroll horizontal solo para tablas que no quepan */
-  -webkit-overflow-scrolling: touch; /* suaviza scroll en móviles */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* para scroll suave en móviles */
 }
 
 .table {
   width: 100%;
-  min-width: 700px; /* fuerza mínimo ancho para columnas */
   border-collapse: collapse;
   background-color: #0f172a;
   border-radius: 12px;
   overflow: hidden;
   box-sizing: border-box;
+  min-width: 600px; /* evita que la tabla se comprima demasiado */
 }
 
 .table th,
@@ -45,7 +46,7 @@
   color: white;
   font-size: 0.9rem;
   user-select: text;
-  white-space: nowrap; /* evita que el texto se rompa y la tabla se comprima */
+  white-space: nowrap; /* evita que el texto haga wrap y comprima la tabla */
 }
 
 .table th {
@@ -152,4 +153,16 @@
 .dropdownItem:focus {
   background-color: #1e293b;
   outline: none;
+}
+
+/* RESPONSIVE - permite scroll horizontal para tablas en móvil */
+@media (max-width: 768px) {
+  .tableWrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table {
+    min-width: 600px; /* para que no se comprima la tabla */
+  }
 }
